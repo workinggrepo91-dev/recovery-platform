@@ -1,0 +1,71 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // Changing to postgres based on your preferred stack
+  url      = env("DATABASE_URL")
+}
+
+// 1. The User (Can be a Client or an Admin/Investigator)
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  fullName  String
+  role      Role     @default(CLIENT) // CLIENT or ADMIN
+  createdAt DateTime @default(now())
+  
+  cases     Case[]   // A user can submit multiple cases
+}
+
+// 2. The Forensic Case (The core of your app)
+model Case {
+  id            String      @id @default(uuid()) // Unique Case ID (e.g. for tracking)
+  
+  // Client Details
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  
+  // Incident Details
+  assetType     String      // e.g., "BTC", "ETH", "USDT", "Bank Wire"
+  amountLost    String      // Stored as string to handle large crypto decimals
+  transactionTx String?     // The hash of the theft transaction
+  scammerAddress String?    // The wallet funds were sent to
+  incidentDate  DateTime
+  description   String?     @db.Text
+  
+  // Tracking Status
+  status        CaseStatus  @default(SUBMITTED)
+  
+  // Internal Notes (For Investigators only)
+  notes         CaseNote[]
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+// 3. Investigator Notes (The "Investigator Dashboard" creates these)
+model CaseNote {
+  id        String   @id @default(uuid())
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id])
+  content   String   @db.Text // "Funds traced to Binance Hot Wallet..."
+  author    String   // Name of investigator
+  createdAt DateTime @default(now())
+}
+
+// Enums for strict typing
+enum Role {
+  CLIENT
+  ADMIN
+}
+
+enum CaseStatus {
+  SUBMITTED       // Step 1: Client sent it
+  TRIAGE          // Step 2: Admin is looking at it
+  INVESTIGATION   // Step 3: Tracing funds
+  RECOVERY_PHASE  // Step 4: Legal/Exchange contact
+  CLOSED          // Step 5: Done
+}
