@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft, Shield, Clock, AlertTriangle, Wallet, FileText, CheckCircle } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import StatusSelector from '@/app/components/StatusSelector';
+export const dynamic = 'force-dynamic';
 
 const prisma = new PrismaClient();
 
