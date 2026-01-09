@@ -1,13 +1,12 @@
 // app/admin/cases/page.tsx
 import { PrismaClient } from '@prisma/client';
 import Link from 'next/link';
-import { Shield, Search, Filter } from 'lucide-react';
+import { Shield } from 'lucide-react';
 
 const prisma = new PrismaClient();
-export const dynamic = 'force-dynamic'; // Always show fresh data
+export const dynamic = 'force-dynamic'; 
 
 export default async function AllCasesPage() {
-  // Fetch ALL cases, sorted by newest first
   const cases = await prisma.case.findMany({
     orderBy: { createdAt: 'desc' },
   });
@@ -48,7 +47,8 @@ export default async function AllCasesPage() {
                   </td>
                 </tr>
               ) : (
-                cases.map((c) => (
+                /* ✅ FIXED: Added ": any" to the variable 'c' to satisfy TypeScript */
+                cases.map((c: any) => (
                   <tr key={c.id} className="hover:bg-slate-50 transition">
                     <td className="p-4 text-slate-900 font-mono text-xs">
                       {c.id.slice(0, 8)}...
