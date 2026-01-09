@@ -1,40 +1,40 @@
 // app/admin/dashboard/page.tsx
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db'; // Use correct import
 import Link from 'next/link';
 import { Shield, FileText, AlertCircle, TrendingUp } from 'lucide-react';
 
-// Initialize Prisma
-import { prisma } from '@/lib/db';
-
-// This ensures the page always shows fresh data (not cached)
 export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboard() {
-  // 1. Fetch real data from the database
   const cases = await prisma.case.findMany({
     orderBy: { createdAt: 'desc' },
-    take: 5 // Get the 5 most recent cases
+    take: 5 
   });
 
   const totalCases = await prisma.case.count();
   const pendingReview = await prisma.case.count({ where: { status: 'SUBMITTED' } });
 
-  // Calculate total amount lost (parsing strings to integers)
   const allCases = await prisma.case.findMany({ select: { amountLost: true } });
   
-  // ✅ FIX 1: Explicitly added ': any' to 'curr' to satisfy the build
+  // TypeScript fix
   const totalLost = allCases.reduce((acc: number, curr: any) => acc + (parseInt(curr.amountLost) || 0), 0);
 
   return (
     <div className="p-8 bg-slate-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-slate-900 mb-8 flex items-center">
-          <Shield className="w-8 h-8 mr-3 text-blue-600" />
-          Investigator Dashboard
-        </h1>
+        
+        {/* ✅ NEW: Branding in Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-slate-900 flex items-center">
+            <Shield className="w-8 h-8 mr-3 text-blue-600" />
+            Global Digital Forensic
+          </h1>
+          <p className="text-slate-500 mt-1 ml-11">Asset Recovery Overview</p>
+        </div>
 
         {/* Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {/* ... (Keep the rest of your stats cards exactly the same) ... */}
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             <h3 className="text-slate-500 text-sm font-medium">Total Active Cases</h3>
             <p className="text-3xl font-bold text-slate-900 mt-2">{totalCases}</p>
@@ -78,7 +78,6 @@ export default async function AdminDashboard() {
                   </td>
                 </tr>
               ) : (
-                // ✅ FIX 2: Explicitly added ': any' to 'c' to prevent the next error
                 cases.map((c: any) => (
                   <tr key={c.id} className="border-b border-slate-50 hover:bg-slate-50 transition">
                     <td className="p-4 text-slate-700">
