@@ -1,16 +1,16 @@
 // app/(client)/page.tsx
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
-  Shield, 
   ChevronRight, 
-  Lock, 
   Search, 
   FileText, 
   CheckCircle, 
   Bitcoin, 
-  Activity, 
-  Users, 
-  Star 
+  Shield,
+  Star,
+  Globe,
+  Lock
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -18,21 +18,42 @@ export default function LandingPage() {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       
       {/* --- NAVIGATION --- */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
+      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-2">
-              <Shield className="w-8 h-8 text-blue-600 fill-blue-600/10" />
-              <span className="text-xl font-bold text-slate-900 tracking-tight">ForensicsOS</span>
+          <div className="flex justify-between items-center h-20">
+            {/* Logo Section */}
+            <div className="flex items-center gap-3">
+              <div className="relative w-10 h-10 md:w-12 md:h-12 flex-shrink-0">
+                {/* Ensure your file is named 'logo.png' and is in the 'public' folder */}
+                <Image 
+                  src="/logo.png" 
+                  alt="Global Digital Forensic Asset Service Logo" 
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <div className="leading-tight">
+                <span className="block text-sm md:text-lg font-bold text-slate-900 tracking-tight">
+                  Global Digital Forensic
+                </span>
+                <span className="block text-xs md:text-sm font-medium text-slate-500 uppercase tracking-wider">
+                  Asset Service
+                </span>
+              </div>
             </div>
-            <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-              <Link href="#how-it-works" className="hover:text-blue-600 transition">Process</Link>
+
+            {/* Desktop Menu */}
+            <div className="hidden lg:flex items-center gap-8 text-sm font-medium text-slate-600">
+              <Link href="#how-it-works" className="hover:text-blue-600 transition">Our Process</Link>
               <Link href="#reviews" className="hover:text-blue-600 transition">Success Stories</Link>
               <Link href="#about" className="hover:text-blue-600 transition">About Us</Link>
             </div>
+
+            {/* CTA Button */}
             <Link 
               href="/apply" 
-              className="bg-slate-900 text-white px-5 py-2.5 rounded-full font-medium hover:bg-slate-800 transition shadow-lg shadow-blue-900/20"
+              className="bg-slate-900 text-white px-4 md:px-6 py-2.5 rounded-full font-medium hover:bg-slate-800 transition shadow-lg shadow-blue-900/20 text-sm md:text-base"
             >
               Start Recovery
             </Link>
@@ -52,17 +73,17 @@ export default function LandingPage() {
             {/* Left Content */}
             <div className="space-y-8">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wide">
-                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                Authorized Forensic Agents
+                <Globe className="w-3 h-3 animate-pulse" />
+                Global Asset Recovery Agents
               </div>
-              <h1 className="text-5xl md:text-6xl font-extrabold text-white leading-tight">
-                Recover Your <br/>
+              <h1 className="text-4xl md:text-6xl font-extrabold text-white leading-tight">
+                Global Digital Forensic <br/>
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                  Stolen Assets
+                  Asset Service
                 </span>
               </h1>
               <p className="text-lg text-slate-400 max-w-xl leading-relaxed">
-                We specialize in blockchain forensics and legal recovery of cryptocurrency lost to scams, hacks, and fraud. Don't let criminals get away with it.
+                The worldwide leader in blockchain analytics and legal asset recovery. We reclaim lost cryptocurrency from scams, hacks, and investment fraud.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4">
@@ -83,7 +104,7 @@ export default function LandingPage() {
                   </div>
                   <div className="text-sm">
                     <p className="text-white font-bold">1,400+ Cases</p>
-                    <p className="text-slate-400">Successfully Solved</p>
+                    <p className="text-slate-400">Solved Globally</p>
                   </div>
                 </div>
               </div>
@@ -230,7 +251,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Review 1 */}
             <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-100">
-              <p className="text-slate-600 italic mb-6">"I lost 2.5 BTC to a romance scam. I thought it was gone forever. ForensicsOS traced it to a Binance wallet and helped me file the police report correctly. I got 80% back!"</p>
+              <p className="text-slate-600 italic mb-6">"I lost 2.5 BTC to a romance scam. Global Digital Forensic Asset Service traced it to a Binance wallet and helped me file the police report correctly. I got 80% back!"</p>
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center font-bold text-slate-500">JD</div>
                 <div>
@@ -289,7 +310,7 @@ export default function LandingPage() {
             </Link>
           </div>
           <p className="mt-8 text-sm text-slate-500">
-            © 2026 ForensicsOS. All rights reserved. <br/>
+            © 2026 Global Digital Forensic Asset Service. All rights reserved. <br/>
             Secure Encryption • ISO 27001 Certified • Global Coverage
           </p>
         </div>
