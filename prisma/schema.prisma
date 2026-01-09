@@ -5,67 +5,31 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" // Changing to postgres based on your preferred stack
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING") // Add this for Vercel
 }
 
-// 1. The User (Can be a Client or an Admin/Investigator)
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  fullName  String
-  role      Role     @default(CLIENT) // CLIENT or ADMIN
-  createdAt DateTime @default(now())
-  
-  cases     Case[]   // A user can submit multiple cases
-}
-
-// 2. The Forensic Case (The core of your app)
 model Case {
-  id            String      @id @default(uuid()) // Unique Case ID (e.g. for tracking)
+  id            String      @id @default(uuid())
   
-  // Client Details
-  userId        String
-  user          User        @relation(fields: [userId], references: [id])
+  // Client Details (Simplified for MVP - No Login required yet)
+  clientEmail   String?     // We will capture this in the form later
   
   // Incident Details
-  assetType     String      // e.g., "BTC", "ETH", "USDT", "Bank Wire"
-  amountLost    String      // Stored as string to handle large crypto decimals
-  transactionTx String?     // The hash of the theft transaction
-  scammerAddress String?    // The wallet funds were sent to
-  incidentDate  DateTime
-  description   String?     @db.Text
+  assetType     String      
+  amountLost    String      
+  transactionTx String?     
+  scammerAddress String?    
+  incidentDate  DateTime    @default(now()) // Default to now if not provided
+  description   String?     
   
   // Tracking Status
-  status        CaseStatus  @default(SUBMITTED)
+  status        String      @default("SUBMITTED") 
   
-  // Internal Notes (For Investigators only)
-  notes         CaseNote[]
+  // Internal Notes 
+  notes         String?     // Simple text notes for now
   
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-}
-
-// 3. Investigator Notes (The "Investigator Dashboard" creates these)
-model CaseNote {
-  id        String   @id @default(uuid())
-  caseId    String
-  case      Case     @relation(fields: [caseId], references: [id])
-  content   String   @db.Text // "Funds traced to Binance Hot Wallet..."
-  author    String   // Name of investigator
-  createdAt DateTime @default(now())
-}
-
-// Enums for strict typing
-enum Role {
-  CLIENT
-  ADMIN
-}
-
-enum CaseStatus {
-  SUBMITTED       // Step 1: Client sent it
-  TRIAGE          // Step 2: Admin is looking at it
-  INVESTIGATION   // Step 3: Tracing funds
-  RECOVERY_PHASE  // Step 4: Legal/Exchange contact
-  CLOSED          // Step 5: Done
 }
