@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Shield, FileText, AlertCircle, TrendingUp } from 'lucide-react';
 
 // Initialize Prisma
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/db';
 
 // This ensures the page always shows fresh data (not cached)
 export const dynamic = 'force-dynamic';

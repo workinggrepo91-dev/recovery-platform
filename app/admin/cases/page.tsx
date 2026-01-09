@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import Link from 'next/link';
 import { Shield } from 'lucide-react';
 
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/db';
 export const dynamic = 'force-dynamic'; 
 
 export default async function AllCasesPage() {

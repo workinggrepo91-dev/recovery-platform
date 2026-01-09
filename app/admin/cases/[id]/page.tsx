@@ -1,27 +1,25 @@
 // app/admin/cases/[id]/page.tsx
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db'; // 👈 IMPORT FROM HELPER
 import Link from 'next/link';
 import { ArrowLeft, Shield, Clock, AlertTriangle, Wallet, FileText, CheckCircle } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import StatusSelector from '@/app/components/StatusSelector';
-export const dynamic = 'force-dynamic';
 
-const prisma = new PrismaClient();
+// This is crucial for the build to pass
+export const dynamic = 'force-dynamic';
 
 export default async function CaseDetailsPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // 1. Get the Case ID from the URL
   const { id } = await params;
 
-  // 2. Fetch the full case details
+  // Use the shared prisma instance
   const caseDetail = await prisma.case.findUnique({
     where: { id: id },
   });
 
-  // 3. Handle 404 if ID is wrong
   if (!caseDetail) {
     notFound();
   }
@@ -51,13 +49,9 @@ export default async function CaseDetailsPage({
             </p>
           </div>
 
-          {/* Action Buttons (Placeholder for now) */}
           <div className="flex gap-3">
             <button className="px-4 py-2 bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 transition">
               Download PDF
-            </button>
-            <button className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition">
-              Update Status
             </button>
           </div>
         </div>
@@ -109,7 +103,7 @@ export default async function CaseDetailsPage({
               
               <div className="space-y-4">
                 
-                {/* ✅ NEW: Full Copyable Case ID */}
+                {/* Full Copyable Case ID */}
                 <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
                   <div className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">
                     Full Case ID (For Client)
@@ -119,7 +113,6 @@ export default async function CaseDetailsPage({
                   </div>
                 </div>
 
-                {/* Existing Asset Row */}
                 <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                   <div className="flex items-center text-slate-600">
                     <Wallet className="w-5 h-5 mr-3" />
@@ -128,7 +121,6 @@ export default async function CaseDetailsPage({
                   <span className="font-bold text-slate-900">{caseDetail.assetType}</span>
                 </div>
 
-                {/* Existing Loss Row */}
                 <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                   <div className="flex items-center text-slate-600">
                     <AlertTriangle className="w-5 h-5 mr-3" />
