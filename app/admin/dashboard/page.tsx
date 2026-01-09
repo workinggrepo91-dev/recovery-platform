@@ -21,7 +21,7 @@ export default async function AdminDashboard() {
 
   // Calculate total amount lost (parsing strings to integers)
   const allCases = await prisma.case.findMany({ select: { amountLost: true } });
-  const totalLost = allCases.reduce((acc, curr) => acc + (parseInt(curr.amountLost) || 0), 0);
+  const totalLost = allCases.reduce((acc: number, curr) => acc + (parseInt(curr.amountLost) || 0), 0);
 
   return (
     <div className="p-8 bg-slate-50 min-h-screen">
