@@ -1,4 +1,4 @@
-// app/(admin)/dashboard/page.tsx
+// app/admin/dashboard/page.tsx
 import { PrismaClient } from '@prisma/client';
 import Link from 'next/link';
 import { Shield, FileText, AlertCircle, TrendingUp } from 'lucide-react';
@@ -21,7 +21,9 @@ export default async function AdminDashboard() {
 
   // Calculate total amount lost (parsing strings to integers)
   const allCases = await prisma.case.findMany({ select: { amountLost: true } });
-  const totalLost = allCases.reduce((acc: number, curr) => acc + (parseInt(curr.amountLost) || 0), 0);
+  
+  // ✅ FIX 1: Explicitly added ': any' to 'curr' to satisfy the build
+  const totalLost = allCases.reduce((acc: number, curr: any) => acc + (parseInt(curr.amountLost) || 0), 0);
 
   return (
     <div className="p-8 bg-slate-50 min-h-screen">
@@ -76,7 +78,8 @@ export default async function AdminDashboard() {
                   </td>
                 </tr>
               ) : (
-                cases.map((c) => (
+                // ✅ FIX 2: Explicitly added ': any' to 'c' to prevent the next error
+                cases.map((c: any) => (
                   <tr key={c.id} className="border-b border-slate-50 hover:bg-slate-50 transition">
                     <td className="p-4 text-slate-700">
                       {new Date(c.createdAt).toLocaleDateString()}
