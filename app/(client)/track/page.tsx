@@ -48,7 +48,8 @@ export default function TrackPage() {
             value={caseId}
             onChange={(e) => setCaseId(e.target.value)}
             placeholder="e.g. 550e8400-e29b..." 
-            className="w-full border border-slate-300 p-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+            // ✅ UPDATED COLORS BELOW:
+            className="w-full border border-slate-300 p-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm text-slate-900 placeholder:text-slate-500 bg-white"
           />
         </div>
 

@@ -1,7 +1,7 @@
 // app/admin/dashboard/page.tsx
-import { prisma } from '@/lib/db'; // Use correct import
+import { prisma } from '@/lib/db';
 import Link from 'next/link';
-import { Shield, FileText, AlertCircle, TrendingUp } from 'lucide-react';
+import { Shield } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,16 +14,13 @@ export default async function AdminDashboard() {
   const totalCases = await prisma.case.count();
   const pendingReview = await prisma.case.count({ where: { status: 'SUBMITTED' } });
 
-  const allCases = await prisma.case.findMany({ select: { amountLost: true } });
+  // Note: We can't easily sum "6.10 Lac" mathematically without complex parsing, 
+  // so we will just count the cases for now.
   
-  // TypeScript fix
-  const totalLost = allCases.reduce((acc: number, curr: any) => acc + (parseInt(curr.amountLost) || 0), 0);
-
   return (
     <div className="p-8 bg-slate-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
         
-        {/* ✅ NEW: Branding in Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-slate-900 flex items-center">
             <Shield className="w-8 h-8 mr-3 text-blue-600" />
@@ -34,7 +31,6 @@ export default async function AdminDashboard() {
 
         {/* Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* ... (Keep the rest of your stats cards exactly the same) ... */}
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             <h3 className="text-slate-500 text-sm font-medium">Total Active Cases</h3>
             <p className="text-3xl font-bold text-slate-900 mt-2">{totalCases}</p>
@@ -44,17 +40,21 @@ export default async function AdminDashboard() {
             <p className="text-3xl font-bold text-orange-600 mt-2">{pendingReview}</p>
           </div>
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <h3 className="text-slate-500 text-sm font-medium">Total Reported Loss</h3>
-            <p className="text-3xl font-bold text-red-600 mt-2">
-              ${totalLost.toLocaleString()}
-            </p>
+            <h3 className="text-slate-500 text-sm font-medium">System Status</h3>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+              </span>
+              <p className="text-sm font-bold text-slate-700">Online & Secure</p>
+            </div>
           </div>
         </div>
 
         {/* Recent Cases Table */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-slate-900">Recent Submissions</h2>
+            <h2 className="text-lg font-semibold text-slate-900">Recent Applications</h2>
             <Link href="/admin/cases" className="text-blue-600 text-sm font-medium hover:underline">
               View All
             </Link>
@@ -64,8 +64,8 @@ export default async function AdminDashboard() {
             <thead className="bg-slate-50 border-b border-slate-100">
               <tr>
                 <th className="p-4 text-sm font-medium text-slate-500">Date</th>
-                <th className="p-4 text-sm font-medium text-slate-500">Asset</th>
-                <th className="p-4 text-sm font-medium text-slate-500">Loss</th>
+                <th className="p-4 text-sm font-medium text-slate-500">Full Name</th>
+                <th className="p-4 text-sm font-medium text-slate-500">Loss Amount</th>
                 <th className="p-4 text-sm font-medium text-slate-500">Status</th>
                 <th className="p-4 text-sm font-medium text-slate-500">Action</th>
               </tr>
@@ -83,13 +83,11 @@ export default async function AdminDashboard() {
                     <td className="p-4 text-slate-700">
                       {new Date(c.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="p-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {c.assetType}
-                      </span>
+                    <td className="p-4 text-slate-900 font-medium">
+                      {c.fullName || "Unknown"}
                     </td>
-                    <td className="p-4 text-slate-700 font-mono">
-                      ${parseInt(c.amountLost).toLocaleString()}
+                    <td className="p-4 text-red-600 font-medium">
+                      {c.amountLost || "N/A"}
                     </td>
                     <td className="p-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

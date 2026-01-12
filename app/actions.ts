@@ -8,25 +8,45 @@ import { cookies } from 'next/headers';
 
 // --- CASE SUBMISSION ---
 export async function createCase(formData: FormData) {
+  // Extract all the new fields from the form
   const rawData = {
-    assetType: formData.get('assetType') as string,
+    fullName: formData.get('fullName') as string,
+    email: formData.get('email') as string,
+    phone: formData.get('phone') as string,
+    country: formData.get('country') as string,
+    dateOfBirth: formData.get('dateOfBirth') as string,
     amountLost: formData.get('amountLost') as string,
-    transactionTx: formData.get('transactionTx') as string,
-    scammerAddress: formData.get('scammerAddress') as string,
+    timesVictim: formData.get('timesVictim') as string,
+    awareOfScam: formData.get('awareOfScam') as string,
+    paymentMethod: formData.get('paymentMethod') as string,
+    lossYear: formData.get('lossYear') as string,
+    recoveryAttempts: formData.get('recoveryAttempts') as string,
+    scammerName: formData.get('scammerName') as string,
     description: formData.get('description') as string,
-    incidentDate: new Date(formData.get('incidentDate') as string || new Date().toISOString()),
   };
 
   try {
     await prisma.case.create({
       data: {
-        assetType: rawData.assetType,
+        fullName: rawData.fullName,
+        email: rawData.email,
+        phone: rawData.phone,
+        country: rawData.country,
+        dateOfBirth: rawData.dateOfBirth,
         amountLost: rawData.amountLost,
-        transactionTx: rawData.transactionTx,
-        scammerAddress: rawData.scammerAddress,
+        timesVictim: rawData.timesVictim,
+        awareOfScam: rawData.awareOfScam,
+        paymentMethod: rawData.paymentMethod,
+        lossYear: rawData.lossYear,
+        recoveryAttempts: rawData.recoveryAttempts,
+        scammerName: rawData.scammerName,
         description: rawData.description,
-        incidentDate: rawData.incidentDate,
         status: "SUBMITTED",
+        // Fill legacy fields with defaults to keep DB happy
+        assetType: "N/A", 
+        transactionTx: "N/A",
+        scammerAddress: "N/A",
+        incidentDate: new Date(),
       },
     });
   } catch (error) {
@@ -36,7 +56,6 @@ export async function createCase(formData: FormData) {
 
   redirect('/track?success=true');
 }
-
 // --- UPDATE STATUS ---
 export async function updateCaseStatus(caseId: string, newStatus: string) {
   try {

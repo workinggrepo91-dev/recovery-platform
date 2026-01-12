@@ -1,9 +1,8 @@
 // app/admin/cases/page.tsx
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import Link from 'next/link';
 import { Shield } from 'lucide-react';
 
-import { prisma } from '@/lib/db';
 export const dynamic = 'force-dynamic'; 
 
 export default async function AllCasesPage() {
@@ -31,10 +30,10 @@ export default async function AllCasesPage() {
           <table className="w-full text-left">
             <thead className="bg-slate-50 border-b border-slate-100">
               <tr>
-                <th className="p-4 text-sm font-medium text-slate-500">Case ID</th>
-                <th className="p-4 text-sm font-medium text-slate-500">Date Reported</th>
-                <th className="p-4 text-sm font-medium text-slate-500">Asset</th>
+                <th className="p-4 text-sm font-medium text-slate-500">Full Name</th>
+                <th className="p-4 text-sm font-medium text-slate-500">Phone</th>
                 <th className="p-4 text-sm font-medium text-slate-500">Loss Amount</th>
+                <th className="p-4 text-sm font-medium text-slate-500">Scammer</th>
                 <th className="p-4 text-sm font-medium text-slate-500">Status</th>
                 <th className="p-4 text-sm font-medium text-slate-500">Action</th>
               </tr>
@@ -47,22 +46,19 @@ export default async function AllCasesPage() {
                   </td>
                 </tr>
               ) : (
-                /* ✅ FIXED: Added ": any" to the variable 'c' to satisfy TypeScript */
                 cases.map((c: any) => (
                   <tr key={c.id} className="hover:bg-slate-50 transition">
-                    <td className="p-4 text-slate-900 font-mono text-xs">
-                      {c.id.slice(0, 8)}...
-                    </td>
-                    <td className="p-4 text-slate-600">
-                      {new Date(c.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="p-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
-                        {c.assetType}
-                      </span>
-                    </td>
                     <td className="p-4 text-slate-900 font-medium">
-                      ${parseInt(c.amountLost).toLocaleString()}
+                      {c.fullName || "Unknown"}
+                    </td>
+                    <td className="p-4 text-slate-600 text-sm">
+                      {c.phone || "N/A"}
+                    </td>
+                    <td className="p-4 text-red-600 font-medium">
+                      {c.amountLost || "N/A"}
+                    </td>
+                    <td className="p-4 text-slate-600 text-sm">
+                       {c.scammerName || "N/A"}
                     </td>
                     <td className="p-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
