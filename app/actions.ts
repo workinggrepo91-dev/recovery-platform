@@ -1,14 +1,13 @@
 // app/actions.ts
 'use server';
 
-import { prisma } from '@/lib/db'; // 👈 Use the safe singleton import
+import { prisma } from '@/lib/db';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 
 // --- CASE SUBMISSION ---
 export async function createCase(formData: FormData) {
-  // Extract all the new fields from the form
   const rawData = {
     fullName: formData.get('fullName') as string,
     email: formData.get('email') as string,
@@ -25,8 +24,10 @@ export async function createCase(formData: FormData) {
     description: formData.get('description') as string,
   };
 
+  let newCase;
+
   try {
-    await prisma.case.create({
+    newCase = await prisma.case.create({
       data: {
         fullName: rawData.fullName,
         email: rawData.email,
@@ -42,7 +43,7 @@ export async function createCase(formData: FormData) {
         scammerName: rawData.scammerName,
         description: rawData.description,
         status: "SUBMITTED",
-        // Fill legacy fields with defaults to keep DB happy
+        // Legacy fields mapping
         assetType: "N/A", 
         transactionTx: "N/A",
         scammerAddress: "N/A",
@@ -54,9 +55,11 @@ export async function createCase(formData: FormData) {
     throw new Error('Failed to create case');
   }
 
-  redirect('/track?success=true');
+  // Redirect to success page
+  redirect(`/success?id=${newCase.id}`); 
 }
-// --- UPDATE STATUS ---
+
+// --- UPDATE STATUS (This was the missing export!) ---
 export async function updateCaseStatus(caseId: string, newStatus: string) {
   try {
     await prisma.case.update({
@@ -64,8 +67,9 @@ export async function updateCaseStatus(caseId: string, newStatus: string) {
       data: { status: newStatus },
     });
     
-    revalidatePath('/admin/cases/[id]'); 
+    revalidatePath(`/admin/cases/${caseId}`); 
     revalidatePath('/admin/dashboard');
+    revalidatePath('/admin/cases');
     return { success: true };
   } catch (error) {
     return { success: false };
@@ -79,8 +83,6 @@ export async function getCaseStatus(caseId: string) {
       where: { id: caseId },
       select: { 
         status: true, 
-        assetType: true,
-        incidentDate: true 
       }
     });
 
