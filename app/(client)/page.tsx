@@ -1,19 +1,25 @@
 // app/(client)/page.tsx
 import Link from 'next/link';
 import Image from 'next/image';
-import { 
-  ChevronRight, 
-  Search, 
-  CheckCircle, 
-  Bitcoin, 
+import CookieSettingsButton from '@/app/components/CookieSettingsButton';
+import {
+  ChevronRight,
+  Search,
+  CheckCircle,
+  Bitcoin,
   Shield,
   Star,
   Globe,
   Lock,
   Scale,
   Eye,
-  Activity
+  Activity,
+  Mail,
+  MapPin,
+  Phone,
 } from 'lucide-react';
+
+import CookieBanner from '@/app/components/CookieBanner';
 
 export default function LandingPage() {
   return (
@@ -364,40 +370,198 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* --- CTA FOOTER --- */}
-      <div className="bg-slate-900 text-white pt-20 pb-10 px-4">
-        <div className="max-w-4xl mx-auto text-center border-b border-slate-800 pb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">We Are Here To Help.</h2>
-          <p className="text-slate-400 text-lg mb-8 max-w-2xl mx-auto">
-            Our mission is to restore trust, provide clarity, and pursue every legitimate avenue available to help affected individuals seek financial redress responsibly and ethically.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-             <Link 
-              href="/apply" 
-              className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition text-lg w-full sm:w-auto"
-            >
-              Start Free Assessment
-            </Link>
-            <Link 
-              href="/track" 
-              className="px-8 py-4 bg-transparent border border-slate-600 hover:bg-slate-800 text-white font-bold rounded-lg transition text-lg w-full sm:w-auto"
-            >
-              Track Existing Case
-            </Link>
+      {/* --- MEGA FOOTER --- */}
+<footer className="bg-slate-950 text-slate-300 pt-20 pb-10 border-t border-slate-800">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    {/* Top CTA */}
+    <div className="text-center max-w-3xl mx-auto mb-20">
+      <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+        We Are Here To Help.
+      </h2>
+
+      <p className="text-slate-400 text-lg mb-8">
+        Our mission is to restore trust, provide clarity, and pursue every
+        legitimate avenue available to help affected individuals seek financial
+        redress responsibly and ethically.
+      </p>
+
+      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <Link
+          href="/apply"
+          className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition text-lg w-full sm:w-auto"
+        >
+          Start Free Assessment
+        </Link>
+
+        <Link
+          href="/track"
+          className="px-8 py-4 bg-transparent border border-slate-700 hover:bg-slate-800 text-white font-bold rounded-lg transition text-lg w-full sm:w-auto"
+        >
+          Track Existing Case
+        </Link>
+      </div>
+    </div>
+
+    {/* Footer Columns */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16 border-t border-slate-800 pt-16">
+
+      {/* Brand */}
+      <div className="lg:col-span-1">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="relative w-10 h-10 flex-shrink-0 bg-white rounded-lg p-1">
+            <Image
+              src="/logo.png"
+              alt="GDFAS Logo"
+              fill
+              className="object-contain p-1"
+            />
+          </div>
+
+          <div className="leading-tight">
+            <span className="block text-sm font-bold text-white tracking-tight">
+              Global Digital Forensic
+            </span>
+            <span className="block text-xs font-medium text-slate-500 uppercase tracking-wider">
+              Asset Service
+            </span>
           </div>
         </div>
 
-        {/* --- DISCLAIMER --- */}
-        <div className="max-w-5xl mx-auto mt-12 text-xs text-slate-500 space-y-4 text-justify">
-          <p className="font-bold uppercase tracking-wide text-slate-400">Important Notice & Disclaimer</p>
-          <p>
-            Recovery outcomes are subject to eligibility, regulatory scope, available evidence, and the specific circumstances of each case. Submission of an application does not guarantee recovery or compensation. We do not provide legal advice, and all actions are conducted within applicable regulatory and legal frameworks.
-          </p>
-          <p>
-            © 2026 Global Digital Forensic Asset Service (GDFAS). All rights reserved. GDFAS oversees banks, insurance companies, investment providers, and pension firms to ensure customers are not left financially vulnerable due to institutional failure or misconduct.
-          </p>
+        <p className="text-sm text-slate-400 mb-6">
+          An independent UK-based consumer protection body dedicated to
+          financial restitution and forensic asset recovery.
+        </p>
+
+        <div className="flex gap-4">
+          <Shield className="w-6 h-6 text-slate-600 hover:text-blue-500 transition" />
+          <Scale className="w-6 h-6 text-slate-600 hover:text-blue-500 transition" />
+          <Lock className="w-6 h-6 text-slate-600 hover:text-blue-500 transition" />
         </div>
       </div>
+
+      {/* Services */}
+      <div>
+        <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">
+          Services
+        </h4>
+
+        <ul className="space-y-3 text-sm">
+          <li>
+            <Link href="/apply" className="hover:text-blue-400 transition">
+              File a Claim
+            </Link>
+          </li>
+
+          <li>
+            <Link href="/track" className="hover:text-blue-400 transition">
+              Track Investigation
+            </Link>
+          </li>
+
+          <li>
+            <Link href="#process" className="hover:text-blue-400 transition">
+              How it Works
+            </Link>
+          </li>
+
+          <li>
+            <Link href="#reviews" className="hover:text-blue-400 transition">
+              Success Stories
+            </Link>
+          </li>
+        </ul>
+      </div>
+
+      {/* Legal */}
+      <div>
+        <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">
+          Legal & Compliance
+        </h4>
+
+        <ul className="space-y-3 text-sm">
+          <li>
+            <Link href="/privacy" className="hover:text-blue-400 transition">
+              Privacy Policy
+            </Link>
+          </li>
+
+          <li>
+            <Link href="/terms" className="hover:text-blue-400 transition">
+              Terms of Service
+            </Link>
+          </li>
+
+          <li>
+            <CookieSettingsButton />
+          </li>
+
+          <li>
+            <Link href="/regulatory" className="hover:text-blue-400 transition">
+              Regulatory Framework
+            </Link>
+          </li>
+        </ul>
+      </div>
+
+      {/* Contact */}
+      <div>
+        <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">
+          Headquarters
+        </h4>
+
+        <ul className="space-y-4 text-sm">
+          <li className="flex items-start gap-3">
+            <MapPin className="w-5 h-5 text-blue-500 flex-shrink-0" />
+            <span>
+              Financial District, London
+              <br />
+              United Kingdom
+            </span>
+          </li>
+
+          <li className="flex items-center gap-3">
+            <Mail className="w-5 h-5 text-blue-500 flex-shrink-0" />
+            <span>support@gdfas.com</span>
+          </li>
+
+          <li className="flex items-center gap-3">
+            <Phone className="w-5 h-5 text-blue-500 flex-shrink-0" />
+            <span>+44 (0)20 XXX XXXX</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    {/* Disclaimer */}
+    <div className="pt-8 border-t border-slate-800 text-xs text-slate-500 space-y-4 text-justify md:text-left">
+      <p className="font-bold uppercase tracking-wide text-slate-400">
+        Important Notice & Disclaimer
+      </p>
+
+      <p>
+        Recovery outcomes are subject to eligibility, regulatory scope,
+        available evidence, and the specific circumstances of each case.
+        Submission of an application does  guarantee recovery or
+        compensation to a level. 
+      </p>
+
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-6">
+        <p>
+          © {new Date().getFullYear()} Global Digital Forensic Asset Service
+          (GDFAS). All rights reserved.
+        </p>
+
+        <div className="flex items-center gap-2 text-slate-400">
+          <Lock className="w-3 h-3" />
+          SSL Secured • ISO 27001 Certified
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<CookieBanner />
 
     </div>
   );
