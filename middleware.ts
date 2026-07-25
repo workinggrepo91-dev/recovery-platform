@@ -20,10 +20,18 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // 5. Check if user is trying to access Client Dashboard
+  if (request.nextUrl.pathname.startsWith('/dashboard')) {
+    const clientSession = request.cookies.get('client_session');
+    if (!clientSession) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
+
   return NextResponse.next();
 }
 
 // Configure which routes to monitor
 export const config = {
-  matcher: '/admin/:path*',
-};
+  matcher: ['/admin/:path*', '/dashboard/:path*'],
+};

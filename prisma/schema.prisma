@@ -34,9 +34,51 @@ model Case {
   description      String // How it occurred
 
   // --- LEGACY/OPTIONAL ---
-  // We make these optional (?) so old code doesn't break immediately
   assetType      String? 
   transactionTx  String?
   scammerAddress String?
   incidentDate   DateTime?
+
+  // --- CLIENT PORTAL & RECOVERY TRACKING ---
+  userId           String?
+  user             User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  caseReference    String?   // e.g. "RE-EF56D856"
+  disputedAmount   String?   @default("0.00")
+  recoveredAmount  String?   @default("0.00")
+  priority         String    @default("low") // low, medium, high
+  legalStatus      String    @default("Legal Action")
+  progressStep     String    @default("SUBMITTED") // SUBMITTED, IN_REVIEW, INVESTIGATING, LEGAL_ACTION, RECOVERED
+  assignedAgent    String    @default("James Thornton")
+  agentTitle       String    @default("Crypto Recovery Expert")
+  messages         Message[]
+}
+
+model User {
+  id             String    @id @default(uuid())
+  email          String    @unique
+  fullName       String?
+  password       String?   // Optional if signed in via Gmail OAuth
+  authProvider   String    @default("MANUAL") // MANUAL or GMAIL
+  isVerified     Boolean   @default(false)
+  twoFactor      Boolean   @default(false)
+  balance        String    @default("0.00")
+  recovered      String    @default("0.00")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  cases          Case[]
+  messages       Message[]
+}
+
+model Message {
+  id          String   @id @default(uuid())
+  caseId      String
+  userId      String?
+  senderName  String
+  senderRole  String   // "USER" or "AGENT"
+  content     String
+  createdAt   DateTime @default(now())
+
+  case        Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 }

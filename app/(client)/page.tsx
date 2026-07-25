@@ -57,13 +57,21 @@ export default function LandingPage() {
               <Link href="#reviews" className="hover:text-blue-600 transition">Reviews</Link>
             </div>
 
-            {/* CTA Button */}
-            <Link 
-              href="/apply" 
-              className="bg-slate-900 text-white px-4 md:px-6 py-2.5 rounded-full font-medium hover:bg-slate-800 transition shadow-lg shadow-blue-900/20 text-sm md:text-base"
-            >
-              Start Recovery
-            </Link>
+            {/* CTA & Client Portal Login */}
+            <div className="flex items-center gap-3">
+              <Link 
+                href="/login" 
+                className="hidden sm:inline-flex items-center gap-1.5 px-4 md:px-5 py-2.5 rounded-full font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition text-sm shadow-xs"
+              >
+                <span>Client Login</span>
+              </Link>
+              <Link 
+                href="/apply" 
+                className="bg-slate-900 text-white px-4 md:px-6 py-2.5 rounded-full font-medium hover:bg-slate-800 transition shadow-lg shadow-blue-900/20 text-sm md:text-base"
+              >
+                Start Recovery
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
