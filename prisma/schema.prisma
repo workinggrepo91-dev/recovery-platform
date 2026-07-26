@@ -58,27 +58,34 @@ model User {
   email          String    @unique
   fullName       String?
   password       String?   // Optional if signed in via Gmail OAuth
-  authProvider   String    @default("MANUAL") // MANUAL or GMAIL
-  isVerified     Boolean   @default(false)
-  twoFactor      Boolean   @default(false)
-  balance        String    @default("0.00")
-  recovered      String    @default("0.00")
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  authProvider       String    @default("MANUAL") // MANUAL or GMAIL
+  isVerified         Boolean   @default(false)
+  verificationStatus String    @default("UNVERIFIED") // UNVERIFIED, SUBMITTED, VERIFIED, REJECTED
+  govIdDoc           String?   // Government issued ID filename
+  proofOfPaymentDoc  String?   // Proof of payment filename
+  selfieDoc          String?   // Selfie holding phone/ID filename
+  otherDoc           String?   // Other supporting documents filename
+  kycSubmittedAt     DateTime?
+  twoFactor          Boolean   @default(false)
+  balance            String    @default("0.00")
+  recovered          String    @default("0.00")
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
-  cases          Case[]
-  messages       Message[]
+  cases              Case[]
+  messages           Message[]
 }
 
 model Message {
   id          String   @id @default(uuid())
-  caseId      String
+  caseId      String?
   userId      String?
+  userEmail   String?
   senderName  String
   senderRole  String   // "USER" or "AGENT"
   content     String
   createdAt   DateTime @default(now())
 
-  case        Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  case        Case?    @relation(fields: [caseId], references: [id], onDelete: SetNull)
   user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 }

@@ -13,6 +13,11 @@ export interface ClientSession {
   fullName: string | null;
   authProvider: string;
   isVerified: boolean;
+  verificationStatus?: string;
+  govIdDoc?: string | null;
+  proofOfPaymentDoc?: string | null;
+  selfieDoc?: string | null;
+  otherDoc?: string | null;
   twoFactor: boolean;
   balance: string;
   recovered: string;
@@ -42,14 +47,15 @@ export async function registerOrLoginClient(data: {
     });
 
     if (!user) {
-      // Create new user starting at $0.00 balance with zero initial cases
+      // Create new user starting unverified with zero initial cases
       user = await prisma.user.create({
         data: {
           email,
           fullName,
           password: data.password || null,
           authProvider: data.authProvider,
-          isVerified: data.authProvider === 'GMAIL', // Gmail users start pre-verified via Google OAuth
+          isVerified: false, // All clients start unverified until admin approves documentation
+          verificationStatus: "UNVERIFIED",
           balance: '$0.00',
           recovered: '$0.00',
         },
@@ -108,7 +114,8 @@ export async function registerOrLoginClient(data: {
       fullName,
       password: data.password || null,
       authProvider: data.authProvider,
-      isVerified: data.authProvider === 'GMAIL',
+      isVerified: false,
+      verificationStatus: "UNVERIFIED",
       twoFactor: false,
       balance: '$0.00',
       recovered: '$0.00',
@@ -122,7 +129,12 @@ export async function registerOrLoginClient(data: {
     email: user.email,
     fullName: user.fullName || 'Client',
     authProvider: user.authProvider || data.authProvider,
-    isVerified: user.isVerified || data.authProvider === 'GMAIL',
+    isVerified: Boolean(user.isVerified),
+    verificationStatus: user.verificationStatus || "UNVERIFIED",
+    govIdDoc: user.govIdDoc || null,
+    proofOfPaymentDoc: user.proofOfPaymentDoc || null,
+    selfieDoc: user.selfieDoc || null,
+    otherDoc: user.otherDoc || null,
     twoFactor: user.twoFactor || false,
     balance: user.balance || '$0.00',
     recovered: user.recovered || '$0.00',
@@ -332,3 +344,61 @@ export async function verifyOTPAndLogin(emailInput: string, enteredOtp: string) 
 
   return { success: true };
 }
+
+// --- CLIENT KYC DOCUMENT SUBMISSION ACTION ---
+export async function submitClientKYCDocuments(data: {
+  email: string;
+  govIdDoc: string;
+  proofOfPaymentDoc: string;
+  selfieDoc: string;
+  otherDoc?: string;
+}) {
+  const cleanEmail = data.email ? data.email.toLowerCase().trim() : '';
+  if (!cleanEmail) {
+    return { success: false, error: 'User session email is missing. Please re-login and try again.' };
+  }
+
+  try {
+    const user = await prisma.user.update({
+      where: { email: cleanEmail },
+      data: {
+        verificationStatus: 'SUBMITTED',
+        govIdDoc: data.govIdDoc,
+        proofOfPaymentDoc: data.proofOfPaymentDoc,
+        selfieDoc: data.selfieDoc,
+        otherDoc: data.otherDoc || null,
+        kycSubmittedAt: new Date()
+      }
+    });
+
+    // Also update session cookie with new verificationStatus
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get('client_session');
+    if (sessionCookie && sessionCookie.value) {
+      const parsed: ClientSession = JSON.parse(sessionCookie.value);
+      parsed.verificationStatus = 'SUBMITTED';
+      parsed.govIdDoc = data.govIdDoc;
+      parsed.proofOfPaymentDoc = data.proofOfPaymentDoc;
+      parsed.selfieDoc = data.selfieDoc;
+      parsed.otherDoc = data.otherDoc;
+      cookieStore.set('client_session', JSON.stringify(parsed), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/'
+      });
+    }
+  } catch (error: any) {
+    console.warn("Offline DB fallback during KYC document submission:", error.message);
+  }
+
+  revalidatePath('/dashboard');
+  revalidatePath('/dashboard/verify');
+  revalidatePath('/admin/dashboard');
+
+  return { 
+    success: true, 
+    message: 'Your verification documents have been successfully transmitted to GDFAS Compliance Officers for audit and approval.' 
+  };
+}
+

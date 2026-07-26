@@ -2,6 +2,7 @@
 import { prisma } from '@/lib/db';
 import Link from 'next/link';
 import { Shield, AlertCircle } from 'lucide-react';
+import { syncAndLinkOrphanedCases } from '@/app/actions/adminActions';
 
 export const dynamic = 'force-dynamic'; 
 
@@ -31,6 +32,7 @@ export default async function AllCasesPage() {
   let isOffline = false;
 
   try {
+    await syncAndLinkOrphanedCases();
     cases = await prisma.case.findMany({
       orderBy: { createdAt: 'desc' },
     });
@@ -112,10 +114,10 @@ export default async function AllCasesPage() {
                     </td>
                     <td className="p-4">
                       <Link 
-                        href={`/admin/cases/${c.id}`} 
-                        className="px-4 py-2 bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs rounded-xl transition inline-flex items-center shadow-xs"
+                        href={`/admin/clients/${c.userId || c.email || 'legacy-' + c.id}?caseId=${c.id}`} 
+                        className="px-4 py-2 bg-slate-900 hover:bg-blue-600 text-white font-extrabold text-xs rounded-xl transition inline-flex items-center shadow-xs gap-1.5"
                       >
-                        Manage Controls &rarr;
+                        <span>Client Profile & Case</span> &rarr;
                       </Link>
                     </td>
                   </tr>

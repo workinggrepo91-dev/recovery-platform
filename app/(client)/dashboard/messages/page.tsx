@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { getCaseMessages, sendChatMessage, ChatMessage } from '@/app/actions/chatActions';
+import { getCaseMessages, getUserMessages, sendChatMessage, sendUserMessage, ChatMessage } from '@/app/actions/chatActions';
 import { getCurrentClient } from '@/app/actions/clientAuth';
 import { 
   Send, 
@@ -20,10 +20,11 @@ import {
 
 function MessagesContent() {
   const searchParams = useSearchParams();
-  const refParam = searchParams.get('ref') || 'RE-EF56D856';
+  const refParam = searchParams.get('ref') || 'ACCOUNT-SUPPORT';
 
   const [client, setClient] = useState<any>(null);
-  const [activeCase, setActiveCase] = useState<any>(null);
+  const [channels, setChannels] = useState<any[]>([]);
+  const [activeChannel, setActiveChannel] = useState<any>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
@@ -35,23 +36,32 @@ function MessagesContent() {
     async function init() {
       setLoading(true);
       const user = await getCurrentClient();
+      setClient(user || { fullName: 'Client', email: 'client@recovery.com', cases: [] });
       
-      const casesList = user?.cases || [
-        {
-          id: 'case-1',
-          caseReference: 'RE-EF56D856',
-          scammerName: 'Cryptocurrency',
-          assignedAgent: 'James Thornton',
-          agentTitle: 'Crypto Recovery Expert'
-        }
-      ];
-      
-      setClient(user || { fullName: 'James', email: 'client@gmail.com' });
-      
-      const found = casesList.find((c: any) => c.caseReference === refParam) || casesList[0];
-      setActiveCase(found);
+      const generalChannel = {
+        id: 'account-support-channel',
+        caseReference: 'ACCOUNT-SUPPORT',
+        scammerName: 'General Intake & Support',
+        assignedAgent: 'James Thornton',
+        agentTitle: 'Senior Recovery Director',
+        isGeneral: true
+      };
 
-      const dbMsgs = await getCaseMessages(found.caseReference || 'RE-EF56D856');
+      const userCases = user?.cases && user.cases.length > 0 ? user.cases : [];
+      const combinedChannels = [generalChannel, ...userCases];
+      setChannels(combinedChannels);
+
+      // Select requested channel or default to general account support
+      const found = combinedChannels.find((c: any) => c.caseReference === refParam) || generalChannel;
+      setActiveChannel(found);
+
+      let dbMsgs: ChatMessage[] = [];
+      if (found.isGeneral || found.caseReference === 'ACCOUNT-SUPPORT') {
+        dbMsgs = await getUserMessages(user?.email || 'client@recovery.com');
+      } else {
+        dbMsgs = await getCaseMessages(found.caseReference || found.id);
+      }
+
       setMessages(dbMsgs);
       setLoading(false);
     }
@@ -62,35 +72,46 @@ function MessagesContent() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
+  async function handleChannelSwitch(channel: any) {
+    setActiveChannel(channel);
+    setLoading(true);
+    let msgs: ChatMessage[] = [];
+    if (channel.isGeneral || channel.caseReference === 'ACCOUNT-SUPPORT') {
+      msgs = await getUserMessages(client?.email || 'client@recovery.com');
+    } else {
+      msgs = await getCaseMessages(channel.caseReference || channel.id);
+    }
+    setMessages(msgs);
+    setLoading(false);
+  }
+
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
-    if (!inputText.trim() || sending || !activeCase) return;
+    if (!inputText.trim() || sending || !activeChannel) return;
 
     const textToSend = inputText.trim();
     setInputText('');
     setSending(true);
 
-    const res = await sendChatMessage(
-      activeCase.caseReference || 'RE-EF56D856',
-      client?.fullName || 'Client',
-      textToSend
-    );
+    let res;
+    if (activeChannel.isGeneral || activeChannel.caseReference === 'ACCOUNT-SUPPORT') {
+      res = await sendUserMessage(
+        client?.email || 'client@recovery.com',
+        client?.fullName || client?.email?.split('@')[0] || 'Client',
+        'USER',
+        textToSend
+      );
+    } else {
+      res = await sendChatMessage(
+        activeChannel.caseReference || activeChannel.id,
+        client?.fullName || client?.email?.split('@')[0] || 'Client',
+        textToSend,
+        'USER'
+      );
+    }
 
-    if (res.success) {
+    if (res.success && res.message) {
       setMessages(prev => [...prev, res.message]);
-      
-      // Simulate live expert acknowledgment after a delay to feel responsive & immersive
-      setTimeout(() => {
-        const replyMsg: ChatMessage = {
-          id: 'reply-' + Date.now(),
-          caseId: activeCase.caseReference || 'RE-EF56D856',
-          senderName: activeCase.assignedAgent || 'James Thornton',
-          senderRole: 'AGENT',
-          content: `Thank you for providing that update. I have added this information directly to case file #${activeCase.caseReference}. Our blockchain forensic analysis is progressing smoothly, and I will notify you the moment the legal affidavit is ready for review.`,
-          createdAt: new Date().toISOString()
-        };
-        setMessages(prev => [...prev, replyMsg]);
-      }, 2500);
     }
     setSending(false);
   }
@@ -108,25 +129,26 @@ function MessagesContent() {
       {/* Container Box */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0 overflow-hidden">
         
-        {/* LEFT PANEL: YOUR CASES LIST (4 Cols) */}
+        {/* LEFT PANEL: YOUR CHANNELS LIST (4 Cols) */}
         <div className="lg:col-span-4 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
           <div className="p-5 border-b border-slate-100 flex items-center justify-between">
             <h2 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest flex items-center gap-2">
               <MessageSquare className="w-4 h-4 text-slate-600" />
-              Your Cases
+              Your Channels
             </h2>
             <span className="bg-slate-100 text-slate-700 text-xs px-2.5 py-0.5 rounded-full font-bold">
-              1 Active
+              {channels.length} Active
             </span>
           </div>
 
           <div className="p-3 overflow-y-auto space-y-2 flex-1">
-            {(client?.cases || [activeCase]).map((c: any, i: number) => {
-              const isSelected = (!activeCase && i === 0) || (activeCase?.caseReference === c?.caseReference);
+            {channels.map((c: any, i: number) => {
+              const isSelected = activeChannel?.caseReference === c?.caseReference || activeChannel?.id === c?.id;
+              const isGen = c?.isGeneral || c?.caseReference === 'ACCOUNT-SUPPORT';
               return (
                 <div 
                   key={c?.id || i}
-                  onClick={() => setActiveCase(c)}
+                  onClick={() => handleChannelSwitch(c)}
                   className={`p-4 rounded-2xl cursor-pointer transition border text-left flex flex-col gap-2 ${
                     isSelected 
                       ? 'bg-blue-50/70 border-blue-300 shadow-xs' 
@@ -134,16 +156,18 @@ function MessagesContent() {
                   }`}
                 >
                   <div className="flex justify-between items-start">
-                    <span className="font-mono text-xs font-black text-blue-700 bg-white px-2.5 py-0.5 rounded-md border border-blue-100 shadow-xs">
+                    <span className={`font-mono text-xs font-black px-2.5 py-0.5 rounded-md border shadow-xs ${
+                      isGen ? 'text-indigo-700 bg-indigo-50 border-indigo-200' : 'text-blue-700 bg-white border-blue-100'
+                    }`}>
                       {c?.caseReference || 'RE-EF56D856'}
                     </span>
                     <span className="text-[10px] uppercase font-extrabold text-green-700 bg-green-100 px-2 py-0.5 rounded-full flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-green-600 animate-ping"></span>
-                      Active
+                      Online
                     </span>
                   </div>
 
-                  <p className="font-extrabold text-slate-900 text-base tracking-tight">{c?.scammerName || 'Cryptocurrency'}</p>
+                  <p className="font-extrabold text-slate-900 text-base tracking-tight">{c?.scammerName || 'Claim Inquiry'}</p>
 
                   <div className="flex items-center gap-2 pt-1 border-t border-slate-200/50 text-xs text-slate-600">
                     <div className="w-6 h-6 rounded-full bg-blue-600 text-white font-black text-xs flex items-center justify-center">
@@ -151,7 +175,7 @@ function MessagesContent() {
                     </div>
                     <div>
                       <span className="font-bold text-slate-800">{c?.assignedAgent || 'James Thornton'}</span>
-                      <span className="text-[10px] text-slate-400 block -mt-0.5">{c?.agentTitle || 'Crypto Recovery Expert'}</span>
+                      <span className="text-[10px] text-slate-400 block -mt-0.5">{c?.agentTitle || 'Senior Director'}</span>
                     </div>
                   </div>
                 </div>
@@ -175,7 +199,7 @@ function MessagesContent() {
             <div className="flex items-center gap-3.5">
               <div className="relative">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-lg flex items-center justify-center shadow-md">
-                  {(activeCase?.assignedAgent || 'James')[0]}
+                  {(activeChannel?.assignedAgent || 'James')[0]}
                 </div>
                 {/* Green Online Dot */}
                 <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-white" title="Online now"></div>
@@ -184,19 +208,19 @@ function MessagesContent() {
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight">
-                    {activeCase?.assignedAgent || 'James Thornton'}
+                    {activeChannel?.assignedAgent || 'James Thornton'}
                   </h3>
                   <span className="w-2 h-2 rounded-full bg-green-500 inline-block" title="Online"></span>
                 </div>
                 <p className="text-xs font-semibold text-blue-600">
-                  {activeCase?.agentTitle || 'Crypto Recovery Expert'} • Assigned Investigator
+                  {activeChannel?.agentTitle || 'Senior Director'} • Assigned Specialist
                 </p>
               </div>
             </div>
 
             <div className="text-right">
               <span className="font-mono text-xs sm:text-sm font-black text-slate-700 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs block">
-                {activeCase?.caseReference || 'RE-EF56D856'}
+                {activeChannel?.caseReference || 'ACCOUNT-SUPPORT'}
               </span>
             </div>
           </div>
@@ -216,16 +240,16 @@ function MessagesContent() {
                 </div>
                 <h4 className="text-lg font-bold text-slate-800">Start the Conversation</h4>
                 <p className="text-xs sm:text-sm text-slate-500">
-                  Send your first message. Your assigned recovery expert (<strong className="text-slate-800">{activeCase?.assignedAgent || 'James Thornton'}</strong>) typically responds within a few hours.
+                  Send your first message. Your assigned specialist (<strong className="text-slate-800">{activeChannel?.assignedAgent || 'James Thornton'}</strong>) typically responds within a few moments.
                 </p>
               </div>
             ) : (
               <div className="space-y-6">
-                {/* Initial Case Info Banner inside Chat */}
+                {/* Initial Info Banner inside Chat */}
                 <div className="bg-blue-50/80 border border-blue-200/60 rounded-2xl p-4 text-center text-xs text-blue-900 max-w-md mx-auto">
-                  <span className="font-bold">Encrypted Case Thread Initiated</span>
+                  <span className="font-bold">Encrypted Communication Vault</span>
                   <p className="text-[11px] text-blue-700 mt-0.5">
-                    All communications are securely recorded and legally admissible for regulatory mediation and law enforcement cooperation.
+                    All communications are securely encrypted, protected by 256-bit TLS protocol, and strictly confidential.
                   </p>
                 </div>
 
@@ -266,7 +290,7 @@ function MessagesContent() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Bottom Message Input Box & Security Banner (Exact Match to Image 2) */}
+          {/* Bottom Message Input Box */}
           <div className="p-4 sm:p-5 border-t border-slate-200 bg-white space-y-3 flex-shrink-0">
             
             <form onSubmit={handleSend} className="relative flex items-end gap-2 bg-slate-50 border border-slate-300 rounded-2xl p-2 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition shadow-inner">

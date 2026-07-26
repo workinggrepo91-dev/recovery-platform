@@ -163,47 +163,67 @@ export default function DashboardHomePage() {
           <div className={`h-1.5 w-12 ${user.twoFactor ? 'bg-emerald-500' : 'bg-amber-500'} rounded-full mt-4`}></div>
         </div>
 
-        {/* ID Verification (Controlled directly by Admin switch) */}
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between col-span-2 sm:col-span-1 hover:shadow-md transition">
+        {/* ID Verification Status Card */}
+        <Link href="/dashboard/verify" className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between col-span-2 sm:col-span-1 hover:shadow-md hover:border-blue-300 transition group">
           <div>
-            {user.isVerified ? (
+            {user.isVerified || user.verificationStatus === 'VERIFIED' ? (
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-emerald-600 fill-emerald-600/20" />
                 <p className="text-xl sm:text-2xl font-bold text-emerald-600 tracking-tight">Verified</p>
               </div>
+            ) : user.verificationStatus === 'SUBMITTED' ? (
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-amber-500 fill-amber-500/20" />
+                <p className="text-lg sm:text-xl font-black text-amber-600 tracking-tight">In Review</p>
+              </div>
             ) : (
               <div className="flex items-center gap-2">
-                <ShieldAlert className="w-5 h-5 text-blue-600 fill-blue-600/20" />
+                <ShieldAlert className="w-5 h-5 text-blue-600 fill-blue-600/20 group-hover:scale-110 transition transform" />
                 <p className="text-xl sm:text-2xl font-bold text-blue-600 tracking-tight">Unverified</p>
               </div>
             )}
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">ID Verification</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1 flex items-center justify-between">
+              <span>ID Verification</span>
+              <span className="text-[10px] text-blue-600 group-hover:underline">Manage &rarr;</span>
+            </p>
           </div>
-          <div className={`h-1.5 w-12 ${user.isVerified ? 'bg-emerald-500' : 'bg-blue-400'} rounded-full mt-4`}></div>
-        </div>
+          <div className={`h-1.5 w-12 ${user.isVerified ? 'bg-emerald-500' : user.verificationStatus === 'SUBMITTED' ? 'bg-amber-500' : 'bg-blue-400'} rounded-full mt-4`}></div>
+        </Link>
       </div>
 
       {/* Identity Verification Alert Banner */}
-      {!user.isVerified ? (
-        <div className="bg-gradient-to-r from-blue-100 via-indigo-100 to-blue-50 border border-blue-200/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
-          <div className="flex items-center gap-3 text-blue-950 font-semibold text-sm sm:text-base">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
-              <ShieldAlert className="w-5 h-5" />
+      {!user.isVerified && user.verificationStatus !== 'VERIFIED' ? (
+        <div className={`border rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs transition ${
+          user.verificationStatus === 'SUBMITTED' 
+            ? 'bg-amber-50/90 border-amber-200 text-amber-950' 
+            : 'bg-gradient-to-r from-blue-100 via-indigo-100 to-blue-50 border-blue-200 text-blue-950'
+        }`}>
+          <div className="flex items-center gap-3 font-semibold text-sm sm:text-base">
+            <div className={`w-9 h-9 rounded-xl text-white flex items-center justify-center flex-shrink-0 shadow-sm ${
+              user.verificationStatus === 'SUBMITTED' ? 'bg-amber-600' : 'bg-blue-600'
+            }`}>
+              {user.verificationStatus === 'SUBMITTED' ? <AlertTriangle className="w-5 h-5" /> : <ShieldAlert className="w-5 h-5" />}
             </div>
             <div>
-              <span>Identity verification required. </span>
-              <button 
-                onClick={handleStartVerification} 
-                disabled={isVerifying}
-                className="text-blue-600 hover:text-blue-800 underline font-extrabold inline-flex items-center gap-1 transition"
+              {user.verificationStatus === 'SUBMITTED' ? (
+                <span>Your verification portfolio (Gov ID, Payment Proof, & Selfie) is currently under administrative audit. </span>
+              ) : (
+                <span>Identity KYC verification required (Gov ID, Proof of Payment & Live Selfie). </span>
+              )}
+              <Link 
+                href="/dashboard/verify" 
+                className="text-blue-700 hover:text-blue-900 underline font-extrabold inline-flex items-center gap-1 transition ml-1"
               >
-                Verify your account &rarr;
-              </button>
+                {user.verificationStatus === 'SUBMITTED' ? 'View submitted file records &rarr;' : 'Upload documents & verify account &rarr;'}
+              </Link>
             </div>
           </div>
-          <div className="text-xs bg-white px-3 py-1 rounded-full font-bold text-blue-800 border border-blue-200 shadow-xs flex-shrink-0">
-            REQUIRED FOR PAYMENT RETRIEVAL
-          </div>
+          <Link
+            href="/dashboard/verify" 
+            className="text-xs bg-white hover:bg-slate-50 text-slate-900 px-4 py-2 rounded-xl font-extrabold border border-slate-200 shadow-sm flex-shrink-0 transition transform active:scale-95"
+          >
+            {user.verificationStatus === 'SUBMITTED' ? '🔍 CHECK REVIEW VAULT' : '🛡️ SUBMIT REQUIRED DOCS'}
+          </Link>
         </div>
       ) : (
         <div className="bg-gradient-to-r from-emerald-50 via-green-50 to-emerald-100 border border-emerald-200/80 rounded-2xl p-4 flex items-center justify-between gap-4 shadow-xs">
@@ -213,9 +233,9 @@ export default function DashboardHomePage() {
             </div>
             <span>Identity KYC verified and approved by Global Digital Forensic Administration.</span>
           </div>
-          <span className="text-xs bg-white text-emerald-800 font-extrabold px-3 py-1 rounded-full border border-emerald-200 shadow-xs">
-            COMPACT SECURED
-          </span>
+          <Link href="/dashboard/verify" className="text-xs bg-white hover:bg-slate-50 text-emerald-800 font-extrabold px-3.5 py-1.5 rounded-full border border-emerald-200 shadow-xs">
+            COMPLIANCE APPROVED ✓
+          </Link>
         </div>
       )}
 
