@@ -109,11 +109,34 @@ export default async function AdminDashboard() {
       users = defaultFallbackUsers;
       totalClients = users.length;
     } else {
-      users = dbUsers.map(u => ({
-        ...u,
-        createdAt: u.createdAt.toISOString(),
-        updatedAt: u.updatedAt ? u.updatedAt.toISOString() : u.createdAt.toISOString()
-      }));
+      // Query recent messages to identify threads waiting for admin reply
+      const allMessages = await prisma.message.findMany({
+        orderBy: { createdAt: 'desc' }
+      });
+      const latestRoleByEmail: Record<string, string> = {};
+      const latestTextByEmail: Record<string, string> = {};
+      
+      for (const m of allMessages) {
+        if (m.userEmail) {
+          const em = m.userEmail.toLowerCase().trim();
+          if (!latestRoleByEmail[em]) {
+            latestRoleByEmail[em] = m.senderRole;
+            latestTextByEmail[em] = m.content;
+          }
+        }
+      }
+
+      users = dbUsers.map(u => {
+        const em = u.email ? u.email.toLowerCase().trim() : '';
+        const hasNewMessage = latestRoleByEmail[em] === 'USER';
+        return {
+          ...u,
+          hasNewMessage,
+          lastMessageSnippet: latestTextByEmail[em] || null,
+          createdAt: u.createdAt.toISOString(),
+          updatedAt: u.updatedAt ? u.updatedAt.toISOString() : u.createdAt.toISOString()
+        };
+      });
     }
   } catch (dbError) {
     console.warn("External cloud database connection offline or unreachable. Engaging admin resilience mode:", dbError);
@@ -140,6 +163,37 @@ export default async function AdminDashboard() {
           </h1>
           <p className="text-slate-500 mt-1 ml-11 font-semibold">Asset Recovery Overview & Admin Client Suite</p>
         </div>
+
+        {/* REAL-TIME NEW MESSAGE NOTIFICATION BANNER */}
+        {(() => {
+          const unreadCount = users.filter((u: any) => u.hasNewMessage).length;
+          if (unreadCount === 0) return null;
+          return (
+            <div className="bg-gradient-to-r from-rose-600 via-red-600 to-amber-600 p-6 rounded-3xl text-white shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-red-400/30">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-3xl shadow-inner flex-shrink-0 animate-pulse">
+                  🔔
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-red-200 block">Immediate Action Required • Client Support Thread</span>
+                  <h2 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
+                    You have {unreadCount} new client {unreadCount === 1 ? 'message' : 'messages'} waiting for your reply!
+                  </h2>
+                  <p className="text-xs sm:text-sm text-red-100 font-medium">
+                    Clients are trying to reach out via the encrypted live portal. Check the Registered Clients suite below and click Reply Now to respond.
+                  </p>
+                </div>
+              </div>
+              <a 
+                href="#clients-suite" 
+                className="px-6 py-4 bg-white text-slate-950 hover:bg-rose-50 font-black text-xs uppercase tracking-wider rounded-2xl shadow-xl transition flex items-center gap-2.5 flex-shrink-0 transform hover:scale-105 active:scale-95"
+              >
+                <MessageSquare className="w-4 h-4 text-rose-600 fill-rose-600" />
+                <span>Respond Now &rarr;</span>
+              </a>
+            </div>
+          );
+        })()}
 
         {/* Stats Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">

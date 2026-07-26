@@ -16,10 +16,11 @@ import {
   CreditCard, 
   User, 
   LogOut, 
-  ShieldAlert, 
+  ShieldAlert,
   ShieldCheck,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Globe
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -31,6 +32,7 @@ export default function DashboardSidebar({ user }: SidebarProps) {
 
   const navItemsOverview = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, badge: '1', badgeColor: 'bg-green-500 text-white' },
+    { name: 'Public Website', href: '/', icon: Globe, iconColor: 'text-indigo-600', badge: 'Home', badgeColor: 'bg-indigo-50 text-indigo-700 font-extrabold text-[10px] border border-indigo-200' },
   ];
 
   const navItemsCases = [
@@ -46,7 +48,7 @@ export default function DashboardSidebar({ user }: SidebarProps) {
     <aside className="w-64 bg-white border-r border-slate-200 flex flex-col h-screen sticky top-0 flex-shrink-0 z-40 select-none shadow-sm">
       
       {/* Brand & Client Dashboard Header */}
-      <div className="p-5 border-b border-slate-100 flex items-center gap-3">
+      <Link href="/" className="p-5 border-b border-slate-100 flex items-center gap-3 hover:bg-slate-50 transition cursor-pointer">
         <div className="relative w-9 h-9 flex-shrink-0">
           <Image src="/logo.png" alt="Logo" fill className="object-contain" priority />
         </div>
@@ -54,7 +56,7 @@ export default function DashboardSidebar({ user }: SidebarProps) {
           <span className="block font-extrabold text-slate-900 text-sm tracking-tight uppercase">GDFAS</span>
           <span className="block text-[11px] font-bold text-slate-400 tracking-widest uppercase">Client Dashboard</span>
         </div>
-      </div>
+      </Link>
 
       {/* User Profile Card (Matches Screenshot exact layout) */}
       <div className="p-4 mx-3 my-3 rounded-2xl bg-slate-50 border border-slate-100 shadow-xs transition hover:bg-slate-100/70">

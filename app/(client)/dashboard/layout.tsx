@@ -4,7 +4,7 @@ import { getCurrentClient, ClientSession } from '@/app/actions/clientAuth';
 import DashboardSidebar from '@/app/components/DashboardSidebar';
 import Link from 'next/link';
 import Image from 'next/image';
-import { LogOut, MessageSquare, Shield } from 'lucide-react';
+import { LogOut, MessageSquare, Shield, Globe } from 'lucide-react';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   // Fetch current client session and cases from cookie & DB
@@ -29,7 +29,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
       {/* Mobile Top Header Navigation */}
       <div className="md:hidden bg-white border-b border-slate-200 p-4 sticky top-0 z-50 flex items-center justify-between shadow-sm">
-        <Link href="/dashboard" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition">
           <div className="relative w-8 h-8">
             <Image src="/logo.png" alt="GDFAS" fill className="object-contain" priority />
           </div>
@@ -37,6 +37,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </Link>
         
         <div className="flex items-center gap-2">
+          <Link 
+            href="/" 
+            className="p-2 bg-indigo-50 text-indigo-700 rounded-lg border border-indigo-200 flex items-center gap-1.5 text-xs font-bold"
+          >
+            <Globe className="w-4 h-4" />
+            <span>Website</span>
+          </Link>
           <Link 
             href="/dashboard/messages" 
             className="p-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 flex items-center gap-1.5 text-xs font-bold"

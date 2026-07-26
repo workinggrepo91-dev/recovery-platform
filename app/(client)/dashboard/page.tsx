@@ -15,8 +15,12 @@ import {
   AlertTriangle, 
   FileText, 
   Sparkles,
-  Scale,
-  Award
+  Award,
+  FolderClosed,
+  Clock,
+  Lock,
+  Shield,
+  Scale
 } from 'lucide-react';
 
 export default function DashboardHomePage() {
@@ -370,7 +374,7 @@ export default function DashboardHomePage() {
                   </div>
 
                   {/* BOTTOM: RECOVERY PROGRESS BAR (Driven directly by Admin stage setting) */}
-                  <div className="pt-8">
+                  <div id="timeline" className="pt-8">
                     <p className="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-8">
                       RECOVERY PROGRESS TIMELINE
                     </p>
@@ -433,6 +437,277 @@ export default function DashboardHomePage() {
             })}
           </div>
         )}
+      </div>
+
+      {/* --- DOCUMENTS & COMPLIANCE VAULT MODULE (#documents) --- */}
+      <div id="documents" className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-600/20">
+                <FolderClosed className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                  <span>Compliance & Case Document Vault</span>
+                </h2>
+              </div>
+            </div>
+            <p className="text-xs text-slate-500 font-medium">
+              All identity records, payment receipts, and investigative file exhibits are isolated inside our encrypted SOC-2 compliance repository.
+            </p>
+          </div>
+          <Link
+            href="/dashboard/verify"
+            className="px-5 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-xs rounded-2xl shadow-md hover:shadow-lg transition flex items-center gap-2 flex-shrink-0 transform active:scale-95"
+          >
+            <span>🛡️ Manage Document Vault &rarr;</span>
+          </Link>
+        </div>
+
+        {/* 4 Required Document Categories Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          {/* 1. Government Issued ID */}
+          <div className={`p-5 rounded-2xl border transition flex flex-col justify-between shadow-xs relative ${
+            user.govIdDoc ? 'bg-emerald-50/50 border-emerald-200/80 hover:border-emerald-300' : 'bg-slate-50/80 border-slate-200/80 hover:border-slate-300'
+          }`}>
+            <div>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base shadow-xs ${
+                  user.govIdDoc ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'
+                }`}>
+                  🆔
+                </div>
+                <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                  user.govIdDoc ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200/80 animate-pulse'
+                }`}>
+                  {user.govIdDoc ? 'Uploaded ✓' : 'Action Needed'}
+                </span>
+              </div>
+              <h3 className="font-extrabold text-slate-900 text-sm tracking-tight">Government Issued ID</h3>
+              <p className="text-xs text-slate-500 mt-1 line-clamp-2 font-medium">
+                {user.govIdDoc ? `File secured: ${user.govIdDoc}` : 'Passport, Driver’s License, or National Identity Card required.'}
+              </p>
+            </div>
+            <div className="mt-5 pt-3 border-t border-slate-200/60 flex items-center justify-between">
+              <span className="text-[10px] font-mono font-bold text-slate-400">
+                {user.govIdDoc ? (user.kycSubmittedAt ? new Date(user.kycSubmittedAt).toLocaleDateString() : 'Secure Vault') : 'Pending File'}
+              </span>
+              <Link
+                href="/dashboard/verify"
+                className="text-xs font-extrabold text-blue-600 hover:text-blue-800 underline transition flex items-center gap-0.5"
+              >
+                <span>{user.govIdDoc ? 'Inspect File' : 'Upload File'}</span> &rarr;
+              </Link>
+            </div>
+          </div>
+
+          {/* 2. Proof of Payment */}
+          <div className={`p-5 rounded-2xl border transition flex flex-col justify-between shadow-xs relative ${
+            user.proofOfPaymentDoc ? 'bg-emerald-50/50 border-emerald-200/80 hover:border-emerald-300' : 'bg-slate-50/80 border-slate-200/80 hover:border-slate-300'
+          }`}>
+            <div>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base shadow-xs ${
+                  user.proofOfPaymentDoc ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'
+                }`}>
+                  💳
+                </div>
+                <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                  user.proofOfPaymentDoc ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200/80 animate-pulse'
+                }`}>
+                  {user.proofOfPaymentDoc ? 'Uploaded ✓' : 'Action Needed'}
+                </span>
+              </div>
+              <h3 className="font-extrabold text-slate-900 text-sm tracking-tight">Proof of Payment</h3>
+              <p className="text-xs text-slate-500 mt-1 line-clamp-2 font-medium">
+                {user.proofOfPaymentDoc ? `File secured: ${user.proofOfPaymentDoc}` : 'Bank transfers, blockchain TX hashes, or debit statements.'}
+              </p>
+            </div>
+            <div className="mt-5 pt-3 border-t border-slate-200/60 flex items-center justify-between">
+              <span className="text-[10px] font-mono font-bold text-slate-400">
+                {user.proofOfPaymentDoc ? (user.kycSubmittedAt ? new Date(user.kycSubmittedAt).toLocaleDateString() : 'Secure Vault') : 'Pending File'}
+              </span>
+              <Link
+                href="/dashboard/verify"
+                className="text-xs font-extrabold text-blue-600 hover:text-blue-800 underline transition flex items-center gap-0.5"
+              >
+                <span>{user.proofOfPaymentDoc ? 'Inspect File' : 'Upload File'}</span> &rarr;
+              </Link>
+            </div>
+          </div>
+
+          {/* 3. Live Selfie Holding ID */}
+          <div className={`p-5 rounded-2xl border transition flex flex-col justify-between shadow-xs relative ${
+            user.selfieDoc ? 'bg-emerald-50/50 border-emerald-200/80 hover:border-emerald-300' : 'bg-slate-50/80 border-slate-200/80 hover:border-slate-300'
+          }`}>
+            <div>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base shadow-xs ${
+                  user.selfieDoc ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'
+                }`}>
+                  📸
+                </div>
+                <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                  user.selfieDoc ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200/80 animate-pulse'
+                }`}>
+                  {user.selfieDoc ? 'Uploaded ✓' : 'Action Needed'}
+                </span>
+              </div>
+              <h3 className="font-extrabold text-slate-900 text-sm tracking-tight">Live Selfie & Phone</h3>
+              <p className="text-xs text-slate-500 mt-1 line-clamp-2 font-medium">
+                {user.selfieDoc ? `File secured: ${user.selfieDoc}` : 'Photo holding your ID & mobile phone with today’s date.'}
+              </p>
+            </div>
+            <div className="mt-5 pt-3 border-t border-slate-200/60 flex items-center justify-between">
+              <span className="text-[10px] font-mono font-bold text-slate-400">
+                {user.selfieDoc ? (user.kycSubmittedAt ? new Date(user.kycSubmittedAt).toLocaleDateString() : 'Secure Vault') : 'Pending File'}
+              </span>
+              <Link
+                href="/dashboard/verify"
+                className="text-xs font-extrabold text-blue-600 hover:text-blue-800 underline transition flex items-center gap-0.5"
+              >
+                <span>{user.selfieDoc ? 'Inspect File' : 'Upload File'}</span> &rarr;
+              </Link>
+            </div>
+          </div>
+
+          {/* 4. Other Supporting Documents */}
+          <div className={`p-5 rounded-2xl border transition flex flex-col justify-between shadow-xs relative ${
+            user.otherDoc ? 'bg-emerald-50/50 border-emerald-200/80 hover:border-emerald-300' : 'bg-slate-50/80 border-slate-200/80 hover:border-slate-300'
+          }`}>
+            <div>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base shadow-xs ${
+                  user.otherDoc ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'
+                }`}>
+                  📂
+                </div>
+                <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                  user.otherDoc ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200'
+                }`}>
+                  {user.otherDoc ? 'Uploaded ✓' : 'Optional File'}
+                </span>
+              </div>
+              <h3 className="font-extrabold text-slate-900 text-sm tracking-tight">Supporting Exhibits</h3>
+              <p className="text-xs text-slate-500 mt-1 line-clamp-2 font-medium">
+                {user.otherDoc ? `File secured: ${user.otherDoc}` : 'Police fraud reports, scammer chat histories, or court claims.'}
+              </p>
+            </div>
+            <div className="mt-5 pt-3 border-t border-slate-200/60 flex items-center justify-between">
+              <span className="text-[10px] font-mono font-bold text-slate-400">
+                {user.otherDoc ? (user.kycSubmittedAt ? new Date(user.kycSubmittedAt).toLocaleDateString() : 'Secure Vault') : 'Optional'}
+              </span>
+              <Link
+                href="/dashboard/verify"
+                className="text-xs font-extrabold text-blue-600 hover:text-blue-800 underline transition flex items-center gap-0.5"
+              >
+                <span>{user.otherDoc ? 'Inspect File' : 'Attach File'}</span> &rarr;
+              </Link>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Audit status badge */}
+        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 flex items-center justify-between gap-4 text-xs font-medium text-slate-600">
+          <div className="flex items-center gap-2.5">
+            <Shield className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+            <span>Document security protocol: 256-Bit AES TLS-1.3 Encryption active. Verified documents are directly linked to your master client identity for release of recovered escrow funds.</span>
+          </div>
+          <Link href="/dashboard/verify" className="font-extrabold text-blue-600 hover:underline flex-shrink-0">
+            View Compliance Log &rarr;
+          </Link>
+        </div>
+      </div>
+
+      {/* --- ESCROW PAYMENTS & ASSET DISBURSEMENT MODULE (#payments) --- */}
+      <div id="payments" className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-900 text-white flex items-center justify-center shadow-md">
+              <CreditCard className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div>
+              <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <span>Escrow Payments & Asset Disbursement</span>
+              </h2>
+              <p className="text-xs text-slate-500 font-medium">
+                Manage recovered funds, review financial settlements, and track restitution payout channels.
+              </p>
+            </div>
+          </div>
+          <span className="bg-emerald-50 text-emerald-800 text-[10px] font-black uppercase px-3 py-1 rounded-full border border-emerald-200 shadow-2xs">
+            Escrow Secured
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="p-5 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl shadow-lg flex flex-col justify-between space-y-4">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 block">Current Available Balance</span>
+              <p className="text-3xl font-mono font-extrabold text-white mt-1">{user.balance || '$0.00'}</p>
+              <p className="text-xs text-slate-300 font-medium mt-1">Ready for verified bank wire or cold-wallet routing.</p>
+            </div>
+            <div className="pt-2">
+              <button 
+                onClick={() => {
+                  if (!user.isVerified && user.verificationStatus !== 'VERIFIED') {
+                    alert("Verification Required: You must submit your Gov ID, Proof of Payment, and Live Selfie before requesting escrow funds disbursement.");
+                    router.push('/dashboard/verify');
+                  } else {
+                    alert("Disbursement request submitted! Your assigned forensic director will contact you to confirm transfer routing.");
+                  }
+                }}
+                className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs rounded-xl transition shadow-md flex items-center justify-center gap-1.5 transform active:scale-95"
+              >
+                <span>Request Asset Withdrawal &rarr;</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col justify-between space-y-4">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 block">Total Restitution Recovered</span>
+              <p className="text-3xl font-mono font-extrabold text-slate-900 mt-1">{user.recovered || '$0.00'}</p>
+              <p className="text-xs text-slate-500 font-medium mt-1">Aggregate forensic recoveries achieved by GDFAS legal action.</p>
+            </div>
+            <div className="pt-2">
+              <Link 
+                href="/dashboard"
+                className="w-full py-2.5 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-xl border border-slate-200 transition flex items-center justify-center gap-1 shadow-2xs"
+              >
+                <span>View Recovery Statements</span>
+              </Link>
+            </div>
+          </div>
+
+          <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col justify-between space-y-4">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 block">Disbursement Gatekeeper</span>
+                <Lock className="w-4 h-4 text-slate-400" />
+              </div>
+              <p className="text-sm font-extrabold text-slate-900 mt-2">
+                {user.isVerified || user.verificationStatus === 'VERIFIED' ? '🟢 Gatekeeper Unlocked' : '🟠 Gatekeeper Locked'}
+              </p>
+              <p className="text-xs text-slate-500 font-medium mt-1">
+                {user.isVerified || user.verificationStatus === 'VERIFIED' 
+                  ? 'Your account identity is completely verified. Immediate payouts are authorized.' 
+                  : 'For protection against unauthorized wire redirects, escrow funds cannot be released until all 3 KYC document types are approved by Admin.'}
+              </p>
+            </div>
+            <div className="pt-2">
+              <Link 
+                href="/dashboard/verify"
+                className="w-full py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-extrabold text-xs rounded-xl border border-blue-200 transition flex items-center justify-center gap-1 shadow-2xs"
+              >
+                <span>{user.isVerified || user.verificationStatus === 'VERIFIED' ? 'Review KYC Vault ✓' : 'Complete Verification &rarr;'}</span>
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

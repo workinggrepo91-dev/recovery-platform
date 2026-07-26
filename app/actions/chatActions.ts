@@ -26,7 +26,7 @@ export async function getUserMessages(emailInput: string): Promise<ChatMessage[]
     userEmail: email,
     senderName: 'James Thornton',
     senderRole: 'AGENT',
-    content: 'Hello! I am James Thornton, Senior Asset Recovery Director at GDFAS. This is your personal encrypted communication channel. You can message our forensic division directly here at any time, even before submitting your official recovery case file!',
+    content: 'Welcome! I am James Thornton, Senior Asset Recovery Director at GDFAS. You have reached your private, encrypted communication channel. Our forensic specialists are available to assist with inquiries involving financial fraud, investment scams, cybercrime, digital asset theft, and other asset recovery matters. Feel free to message us anytime, even before filing your official recovery case',
     createdAt: new Date(Date.now() - 3600000).toISOString()
   };
 

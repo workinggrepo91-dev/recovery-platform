@@ -16,7 +16,7 @@ export default function AdminLayout({
       {/* Sidebar */}
       <aside className="w-64 bg-slate-900 text-white flex flex-col fixed h-full shadow-xl z-50">
         <div className="p-6 border-b border-slate-800">
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition cursor-pointer">
             {/* ✅ NEW: Your Logo */}
             <div className="relative w-10 h-10 flex-shrink-0">
               <Image 
@@ -36,7 +36,7 @@ export default function AdminLayout({
                 Forensic Assets
               </span>
             </div>
-          </div>
+          </Link>
         </div>
 
         <nav className="flex-1 p-4 space-y-2">

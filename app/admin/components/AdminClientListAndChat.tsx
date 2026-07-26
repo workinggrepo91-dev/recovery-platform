@@ -36,6 +36,8 @@ interface ClientRecord {
   balance: string;
   cases: any[];
   createdAt: string;
+  hasNewMessage?: boolean;
+  lastMessageSnippet?: string | null;
 }
 
 export default function AdminClientListAndChat({ initialUsers }: { initialUsers: ClientRecord[] }) {
@@ -98,10 +100,14 @@ export default function AdminClientListAndChat({ initialUsers }: { initialUsers:
   function openChatModal(user: ClientRecord) {
     setSelectedUser(user);
     setChatOpen(true);
+    // Automatically clear new message notification badge once opened
+    if (user.hasNewMessage) {
+      setUsers(prev => prev.map(item => item.id === user.id || item.email === user.email ? { ...item, hasNewMessage: false } : item));
+    }
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mt-10">
+    <div id="clients-suite" className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mt-10">
       
       {/* Header */}
       <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50">
@@ -157,14 +163,27 @@ export default function AdminClientListAndChat({ initialUsers }: { initialUsers:
                         <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-900 text-white font-black text-sm flex items-center justify-center shadow-xs group-hover:scale-105 transition transform flex-shrink-0">
                           {(u.fullName || u.email)[0].toUpperCase()}
                         </div>
-                        <div className="space-y-0.5 min-w-[180px]">
-                          <p className="font-extrabold text-slate-900 text-sm sm:text-base tracking-tight leading-none">
-                            {u.fullName || 'Verified Client'}
-                          </p>
+                        <div className="space-y-1 min-w-[180px]">
+                          <div className="flex items-center gap-2">
+                            <p className="font-extrabold text-slate-900 text-sm sm:text-base tracking-tight leading-none">
+                              {u.fullName || 'Verified Client'}
+                            </p>
+                            {u.hasNewMessage && (
+                              <span className="inline-flex items-center gap-1 bg-gradient-to-r from-rose-500 to-red-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-sm animate-pulse flex-shrink-0">
+                                <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                                💬 NEW MESSAGE
+                              </span>
+                            )}
+                          </div>
                           <div className="flex items-center gap-1.5 text-xs text-slate-500 font-mono">
                             <Mail className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
                             <span className="truncate max-w-xs font-medium">{u.email}</span>
                           </div>
+                          {u.hasNewMessage && u.lastMessageSnippet && (
+                            <p className="text-[11px] text-rose-700 bg-rose-50 border border-rose-200/60 font-semibold px-2 py-1 rounded-lg truncate max-w-xs block shadow-2xs">
+                              &ldquo;{u.lastMessageSnippet}&rdquo;
+                            </p>
+                          )}
                         </div>
                       </div>
                     </td>
@@ -230,10 +249,14 @@ export default function AdminClientListAndChat({ initialUsers }: { initialUsers:
 
                         <button
                           onClick={() => openChatModal(u)}
-                          className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-xs rounded-xl transition shadow-md hover:shadow-lg inline-flex items-center gap-1.5 transform active:scale-95"
+                          className={`px-4 py-2.5 font-extrabold text-xs rounded-xl transition shadow-md hover:shadow-lg inline-flex items-center gap-1.5 transform active:scale-95 ${
+                            u.hasNewMessage
+                              ? 'bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white shadow-rose-500/30 ring-2 ring-rose-300 animate-bounce-subtle'
+                              : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white'
+                          }`}
                         >
                           <MessageSquare className="w-3.5 h-3.5" />
-                          <span>Chat &rarr;</span>
+                          <span>{u.hasNewMessage ? 'Reply Now 🔴' : 'Chat &rarr;'}</span>
                         </button>
 
                       </div>

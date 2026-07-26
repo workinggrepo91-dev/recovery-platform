@@ -20,8 +20,11 @@ import {
 } from 'lucide-react';
 
 import CookieBanner from '@/app/components/CookieBanner';
+import { getCurrentClient } from '@/app/actions/clientAuth';
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const client = await getCurrentClient();
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       
@@ -30,7 +33,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo Section */}
-            <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition cursor-pointer">
               <div className="relative w-10 h-10 md:w-12 md:h-12 flex-shrink-0">
                 <Image 
                   src="/logo.png" 
@@ -48,7 +51,7 @@ export default function LandingPage() {
                   Asset Service
                 </span>
               </div>
-            </div>
+            </Link>
 
             {/* Desktop Menu */}
             <div className="hidden lg:flex items-center gap-8 text-sm font-medium text-slate-600">
@@ -59,12 +62,22 @@ export default function LandingPage() {
 
             {/* CTA & Client Portal Login */}
             <div className="flex items-center gap-3">
-              <Link 
-                href="/login" 
-                className="hidden sm:inline-flex items-center gap-1.5 px-4 md:px-5 py-2.5 rounded-full font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition text-sm shadow-xs"
-              >
-                <span>Client Login</span>
-              </Link>
+              {client ? (
+                <Link 
+                  href="/dashboard" 
+                  className="inline-flex items-center gap-2 px-4 md:px-5 py-2.5 rounded-full font-extrabold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 transition text-sm shadow-md"
+                >
+                  <Activity className="w-4 h-4 text-blue-200 animate-pulse flex-shrink-0" />
+                  <span>Open Dashboard</span>
+                </Link>
+              ) : (
+                <Link 
+                  href="/login" 
+                  className="inline-flex items-center gap-1.5 px-4 md:px-5 py-2.5 rounded-full font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition text-sm shadow-xs"
+                >
+                  <span>Client Login</span>
+                </Link>
+              )}
               <Link 
                 href="/apply" 
                 className="bg-slate-900 text-white px-4 md:px-6 py-2.5 rounded-full font-medium hover:bg-slate-800 transition shadow-lg shadow-blue-900/20 text-sm md:text-base"
@@ -416,7 +429,7 @@ export default function LandingPage() {
 
       {/* Brand */}
       <div className="lg:col-span-1">
-        <div className="flex items-center gap-3 mb-6">
+        <Link href="/" className="flex items-center gap-3 mb-6 hover:opacity-80 transition inline-flex cursor-pointer">
           <div className="relative w-10 h-10 flex-shrink-0 bg-white rounded-lg p-1">
             <Image
               src="/logo.png"
@@ -434,7 +447,7 @@ export default function LandingPage() {
               Asset Service
             </span>
           </div>
-        </div>
+        </Link>
 
         <p className="text-sm text-slate-400 mb-6">
           An independent UK-based consumer protection body dedicated to
