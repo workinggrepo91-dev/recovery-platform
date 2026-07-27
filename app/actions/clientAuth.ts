@@ -254,19 +254,31 @@ export async function generatePasswordResetOTP(emailInput: string) {
     expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
   });
 
-  // Transmit OTP strictly via Email (Nodemailer / Gmail SMTP)
+  // Transmit OTP strictly via Email (Nodemailer / Gmail or Custom SMTP)
   try {
-    const smtpUser = process.env.GMAIL_USER || process.env.SMTP_USER;
-    const smtpPass = process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS;
+    const smtpUser = process.env.SMTP_USER || process.env.GMAIL_USER;
+    const smtpPass = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD;
+    const smtpHost = process.env.SMTP_HOST;
+    const smtpPort = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : undefined;
 
     if (smtpUser && smtpPass) {
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: smtpUser,
-          pass: smtpPass,
-        },
-      });
+      const transporter = smtpHost
+        ? nodemailer.createTransport({
+            host: smtpHost,
+            port: smtpPort || 465,
+            secure: (smtpPort || 465) === 465, // true for port 465, false for port 587
+            auth: {
+              user: smtpUser,
+              pass: smtpPass,
+            },
+          })
+        : nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+              user: smtpUser,
+              pass: smtpPass,
+            },
+          });
 
       await transporter.sendMail({
         from: `"GDFAS Security Division" <${smtpUser}>`,
