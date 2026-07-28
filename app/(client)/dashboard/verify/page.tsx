@@ -48,10 +48,34 @@ export default function KYCVerifyPage() {
     loadUser();
   }, []);
 
-  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>, setFile: (name: string) => void) {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0].name);
+  function getDocDisplayName(val?: string) {
+    if (!val) return '';
+    try {
+      const parsed = JSON.parse(val);
+      if (parsed && parsed.name) return parsed.name;
+    } catch (e) {}
+    return val.length > 50 ? 'Uploaded_Document.pdf' : val;
+  }
+
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>, setFile: (val: string) => void) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 15 * 1024 * 1024) {
+      alert("File exceeds maximum allowance (15MB). Please compress or choose a smaller file.");
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const payload = JSON.stringify({
+        name: file.name,
+        type: file.type,
+        dataUrl: reader.result
+      });
+      setFile(payload);
+    };
+    reader.readAsDataURL(file);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -173,10 +197,10 @@ export default function KYCVerifyPage() {
           </p>
           
           <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 text-left space-y-2 text-xs text-slate-700 font-mono">
-            <p><strong>Government ID:</strong> {govId || "Uploaded"}</p>
-            <p><strong>Proof of Payment:</strong> {proofOfPayment || "Uploaded"}</p>
-            <p><strong>Selfie Photo:</strong> {selfie || "Uploaded"}</p>
-            {otherDoc && <p><strong>Supporting Doc:</strong> {otherDoc}</p>}
+            <p><strong>Government ID:</strong> {getDocDisplayName(govId) || "Uploaded"}</p>
+            <p><strong>Proof of Payment:</strong> {getDocDisplayName(proofOfPayment) || "Uploaded"}</p>
+            <p><strong>Selfie Photo:</strong> {getDocDisplayName(selfie) || "Uploaded"}</p>
+            {otherDoc && <p><strong>Supporting Doc:</strong> {getDocDisplayName(otherDoc)}</p>}
           </div>
 
           <div className="pt-2 flex justify-center gap-4">
@@ -247,7 +271,7 @@ export default function KYCVerifyPage() {
                     govId ? 'bg-green-50 border-green-300 text-green-800 shadow-xs' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'
                   }`}>
                     {govId ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <UploadCloud className="w-4 h-4 text-blue-600" />}
-                    <span className="truncate max-w-[200px]">{govId ? `Selected: ${govId}` : 'Select Document File...'}</span>
+                    <span className="truncate max-w-[200px]">{govId ? `Selected: ${getDocDisplayName(govId)}` : 'Select Document File...'}</span>
                   </div>
                 </label>
               </div>
@@ -275,7 +299,7 @@ export default function KYCVerifyPage() {
                     proofOfPayment ? 'bg-green-50 border-green-300 text-green-800 shadow-xs' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'
                   }`}>
                     {proofOfPayment ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <UploadCloud className="w-4 h-4 text-indigo-600" />}
-                    <span className="truncate max-w-[200px]">{proofOfPayment ? `Selected: ${proofOfPayment}` : 'Select Receipt / TX File...'}</span>
+                    <span className="truncate max-w-[200px]">{proofOfPayment ? `Selected: ${getDocDisplayName(proofOfPayment)}` : 'Select Receipt / TX File...'}</span>
                   </div>
                 </label>
               </div>
@@ -303,7 +327,7 @@ export default function KYCVerifyPage() {
                     selfie ? 'bg-green-50 border-green-300 text-green-800 shadow-xs' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'
                   }`}>
                     {selfie ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <UploadCloud className="w-4 h-4 text-purple-600" />}
-                    <span className="truncate max-w-[200px]">{selfie ? `Selected: ${selfie}` : 'Upload Live Selfie Photo...'}</span>
+                    <span className="truncate max-w-[200px]">{selfie ? `Selected: ${getDocDisplayName(selfie)}` : 'Upload Live Selfie Photo...'}</span>
                   </div>
                 </label>
               </div>
@@ -331,7 +355,7 @@ export default function KYCVerifyPage() {
                     otherDoc ? 'bg-green-50 border-green-300 text-green-800 shadow-xs' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'
                   }`}>
                     {otherDoc ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <UploadCloud className="w-4 h-4 text-slate-600" />}
-                    <span className="truncate max-w-[200px]">{otherDoc ? `Selected: ${otherDoc}` : 'Attach Optional Files...'}</span>
+                    <span className="truncate max-w-[200px]">{otherDoc ? `Selected: ${getDocDisplayName(otherDoc)}` : 'Attach Optional Files...'}</span>
                   </div>
                 </label>
               </div>

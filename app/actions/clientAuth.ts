@@ -27,6 +27,17 @@ export interface ClientSession {
 // Server-Side Secure Timed Vault for OTP codes (10 minute expiry) - Never transmitted to frontend browser!
 const secureServerOtpVault = new Map<string, { code: string; expiresAt: number }>();
 
+function extractDocName(docVal: string | null | undefined): string | null {
+  if (!docVal) return null;
+  try {
+    const parsed = JSON.parse(docVal);
+    if (parsed && parsed.name) return parsed.name;
+  } catch (e) {
+    // Return original filename if legacy plain string
+  }
+  return docVal.length > 60 ? 'document_submitted.pdf' : docVal;
+}
+
 // --- SIGN UP OR LOGIN WITH GMAIL / MANUAL ---
 export async function registerOrLoginClient(data: {
   email: string;
@@ -131,10 +142,10 @@ export async function registerOrLoginClient(data: {
     authProvider: user.authProvider || data.authProvider,
     isVerified: Boolean(user.isVerified),
     verificationStatus: user.verificationStatus || "UNVERIFIED",
-    govIdDoc: user.govIdDoc || null,
-    proofOfPaymentDoc: user.proofOfPaymentDoc || null,
-    selfieDoc: user.selfieDoc || null,
-    otherDoc: user.otherDoc || null,
+    govIdDoc: extractDocName(user.govIdDoc) || null,
+    proofOfPaymentDoc: extractDocName(user.proofOfPaymentDoc) || null,
+    selfieDoc: extractDocName(user.selfieDoc) || null,
+    otherDoc: extractDocName(user.otherDoc) || null,
     twoFactor: user.twoFactor || false,
     balance: user.balance || '$0.00',
     recovered: user.recovered || '$0.00',
@@ -389,10 +400,10 @@ export async function submitClientKYCDocuments(data: {
     if (sessionCookie && sessionCookie.value) {
       const parsed: ClientSession = JSON.parse(sessionCookie.value);
       parsed.verificationStatus = 'SUBMITTED';
-      parsed.govIdDoc = data.govIdDoc;
-      parsed.proofOfPaymentDoc = data.proofOfPaymentDoc;
-      parsed.selfieDoc = data.selfieDoc;
-      parsed.otherDoc = data.otherDoc;
+      parsed.govIdDoc = extractDocName(data.govIdDoc) || null;
+      parsed.proofOfPaymentDoc = extractDocName(data.proofOfPaymentDoc) || null;
+      parsed.selfieDoc = extractDocName(data.selfieDoc) || null;
+      parsed.otherDoc = extractDocName(data.otherDoc) || null;
       cookieStore.set('client_session', JSON.stringify(parsed), {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
