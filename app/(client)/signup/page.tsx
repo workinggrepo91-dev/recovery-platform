@@ -42,13 +42,14 @@ export default function SignUpPage() {
       email,
       fullName,
       password,
-      authProvider: 'MANUAL'
+      authProvider: 'MANUAL',
+      isSignUp: true
     });
 
     if (res.success) {
       router.push('/dashboard');
     } else {
-      setError('An error occurred during registration.');
+      setError(res.error || 'An error occurred during registration.');
       setLoading(false);
     }
   }

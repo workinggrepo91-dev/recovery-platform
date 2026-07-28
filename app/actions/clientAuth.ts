@@ -44,6 +44,7 @@ export async function registerOrLoginClient(data: {
   fullName?: string;
   password?: string;
   authProvider: 'MANUAL' | 'GMAIL';
+  isSignUp?: boolean;
 }) {
   const email = data.email.toLowerCase().trim();
   const fullName = data.fullName || (email.split('@')[0] || 'Client');
@@ -58,6 +59,14 @@ export async function registerOrLoginClient(data: {
     });
 
     if (!user) {
+      // If a manual user attempts to SIGN IN on /login with an unregistered email, deny access!
+      if (data.isSignUp === false) {
+        return {
+          success: false,
+          error: "No account found with this email address. Please check your spelling or click 'Create your portal account' below to sign up."
+        };
+      }
+
       // Create new user starting unverified with zero initial cases
       user = await prisma.user.create({
         data: {
@@ -73,6 +82,14 @@ export async function registerOrLoginClient(data: {
         include: { cases: true }
       });
     } else {
+      // If user exists and attempts to SIGN UP manually on /signup, prevent re-registration!
+      if (data.isSignUp === true && data.authProvider === 'MANUAL') {
+        return {
+          success: false,
+          error: "An account is already registered under this email address. Please sign in instead."
+        };
+      }
+
       // If user exists and attempts a MANUAL login/signup, perform credential check!
       if (data.authProvider === 'MANUAL' && data.password) {
         if (!user.password) {

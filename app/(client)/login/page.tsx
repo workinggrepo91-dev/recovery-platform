@@ -40,7 +40,8 @@ export default function LoginPage() {
     const res = await registerOrLoginClient({
       email,
       password,
-      authProvider: 'MANUAL'
+      authProvider: 'MANUAL',
+      isSignUp: false
     });
 
     if (res.success) {
