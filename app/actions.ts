@@ -105,7 +105,7 @@ export async function createCase(formData: FormData) {
   if (isLoggedIn) {
     redirect('/dashboard?submitted=true');
   } else {
-    redirect(`/success?id=${newCase?.id || caseRef}`); 
+    redirect(`/success?id=${newCase?.id || caseRef}&email=${encodeURIComponent(rawData.email)}`); 
   }
 }
 

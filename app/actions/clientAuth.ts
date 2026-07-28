@@ -72,25 +72,6 @@ export async function registerOrLoginClient(data: {
         },
         include: { cases: true }
       });
-
-      // Check if there are any anonymously submitted cases with this email from earlier and attach them
-      const existingCases = await prisma.case.findMany({
-        where: { email: email, userId: null }
-      });
-
-      if (existingCases.length > 0) {
-        await prisma.case.updateMany({
-          where: { email: email, userId: null },
-          data: { 
-            userId: user.id,
-            caseReference: existingCases[0].caseReference || 'RE-EF56D856',
-            disputedAmount: existingCases[0].amountLost || '$0.00',
-            recoveredAmount: '$0.00',
-            assignedAgent: 'James Thornton',
-            agentTitle: 'Crypto Recovery Expert'
-          }
-        });
-      }
     } else {
       // If user exists and attempts a MANUAL login/signup, perform credential check!
       if (data.authProvider === 'MANUAL' && data.password) {
@@ -116,6 +97,31 @@ export async function registerOrLoginClient(data: {
           include: { cases: true }
         });
       }
+    }
+
+    // Always ensure any anonymously submitted claims matching this client email are attached to their dashboard!
+    const unlinkedCases = await prisma.case.findMany({
+      where: { email: email, userId: null }
+    });
+
+    if (unlinkedCases.length > 0) {
+      for (const c of unlinkedCases) {
+        await prisma.case.update({
+          where: { id: c.id },
+          data: { 
+            userId: user.id,
+            caseReference: c.caseReference || `RE-${Math.floor(100000 + Math.random() * 900000)}`,
+            disputedAmount: c.disputedAmount || c.amountLost || '$0.00',
+            recoveredAmount: c.recoveredAmount || '$0.00',
+            assignedAgent: c.assignedAgent || 'James Thornton',
+            agentTitle: c.agentTitle || 'Senior Crypto Recovery Specialist'
+          }
+        });
+      }
+      user = await prisma.user.findUnique({
+        where: { email },
+        include: { cases: true }
+      });
     }
   } catch (dbError) {
     console.warn("Database connection issue, serving seamless fallback session:", dbError);

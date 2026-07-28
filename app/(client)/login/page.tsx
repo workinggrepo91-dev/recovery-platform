@@ -1,12 +1,12 @@
 // app/(client)/login/page.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { registerOrLoginClient } from '@/app/actions/clientAuth';
-import { Lock, ArrowRight, Loader2, Mail, ShieldCheck } from 'lucide-react';
+import { Lock, ArrowRight, Loader2, Mail, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,6 +17,16 @@ export default function LoginPage() {
   // Manual Form State
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const emailParam = params.get('email');
+      if (emailParam) {
+        setEmail(emailParam);
+      }
+    }
+  }, []);
 
   async function handleManualSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -77,6 +87,15 @@ export default function LoginPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10">
         <div className="bg-slate-800/80 backdrop-blur-md py-8 px-6 shadow-2xl sm:rounded-2xl sm:px-10 border border-slate-700/80">
           
+          {/* Automatic Claim Linkage Advisory */}
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3.5 mb-6 flex items-start gap-2.5 text-xs text-emerald-300">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="font-bold text-white">Automatic Claim Linking Active</p>
+              <p className="text-emerald-400/90">Sign in with your email address to automatically synchronize and view all newly filed recovery claims directly inside your dashboard!</p>
+            </div>
+          </div>
+
           {/* GENUINE GMAIL / GOOGLE OAUTH BUTTON */}
           <div>
             <button

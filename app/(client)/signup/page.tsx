@@ -1,7 +1,7 @@
 // app/(client)/signup/page.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -18,6 +18,16 @@ export default function SignUpPage() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const emailParam = params.get('email');
+      if (emailParam) {
+        setEmail(emailParam);
+      }
+    }
+  }, []);
 
   async function handleManualSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -80,6 +90,15 @@ export default function SignUpPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10">
         <div className="bg-slate-800/80 backdrop-blur-md py-8 px-6 shadow-2xl sm:rounded-2xl sm:px-10 border border-slate-700/80">
           
+          {/* Automatic Claim Linkage Advisory */}
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3.5 mb-6 flex items-start gap-2.5 text-xs text-emerald-300">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="font-bold text-white">Automatic Claim Linking Active</p>
+              <p className="text-emerald-400/90">Sign up using the same email address you applied with, and your recovery claim will be automatically placed in your secure workspace dashboard upon entry!</p>
+            </div>
+          </div>
+
           {/* GMAIL / GOOGLE SIGN-UP BUTTON */}
           <div>
             <button

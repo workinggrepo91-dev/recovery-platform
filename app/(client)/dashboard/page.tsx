@@ -23,6 +23,30 @@ import {
   Scale
 } from 'lucide-react';
 
+function formatCurrency(val?: string) {
+  if (!val) return '$0.00';
+  const trimmed = val.trim();
+  if (trimmed.includes(',')) return trimmed;
+  const match = trimmed.match(/^([^\d-]*)(-?\d+)(\.\d+)?(.*)$/);
+  if (match) {
+    const prefix = match[1] !== undefined && match[1] !== '' ? match[1] : '$';
+    const numPart = parseInt(match[2], 10);
+    const decimalPart = match[3] || '';
+    const suffix = match[4] || '';
+    if (!isNaN(numPart)) {
+      return `${prefix}${numPart.toLocaleString('en-US')}${decimalPart}${suffix}`;
+    }
+  }
+  return trimmed;
+}
+
+function getAmountFontSize(str: string) {
+  if (str.length >= 15) return 'text-base sm:text-lg font-black';
+  if (str.length >= 12) return 'text-lg sm:text-xl font-black';
+  if (str.length >= 9) return 'text-xl sm:text-2xl font-black';
+  return 'text-2xl sm:text-3xl font-black';
+}
+
 export default function DashboardHomePage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -119,79 +143,99 @@ export default function DashboardHomePage() {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         
         {/* Balance (Controlled directly by Admin) */}
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between hover:shadow-md transition">
-          <div>
-            <p className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">{user.balance || '$0.00'}</p>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Balance</p>
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between hover:shadow-md transition overflow-hidden min-w-0">
+          <div className="min-w-0">
+            {(() => {
+              const formatted = formatCurrency(user.balance || '$0.00');
+              return (
+                <p 
+                  title={formatted} 
+                  className={`${getAmountFontSize(formatted)} text-slate-900 tracking-tight font-mono truncate w-full`}
+                >
+                  {formatted}
+                </p>
+              );
+            })()}
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1 truncate">Balance</p>
           </div>
-          <div className="h-1.5 w-12 bg-blue-600 rounded-full mt-4"></div>
+          <div className="h-1.5 w-12 bg-blue-600 rounded-full mt-4 flex-shrink-0"></div>
         </div>
 
         {/* Total Cases */}
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between hover:shadow-md transition">
-          <div>
-            <p className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">{userCases.length}</p>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Total Cases</p>
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between hover:shadow-md transition overflow-hidden min-w-0">
+          <div className="min-w-0">
+            <p className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight truncate">{userCases.length}</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1 truncate">Total Cases</p>
           </div>
-          <div className="h-1.5 w-12 bg-indigo-600 rounded-full mt-4"></div>
+          <div className="h-1.5 w-12 bg-indigo-600 rounded-full mt-4 flex-shrink-0"></div>
         </div>
 
         {/* Recovered (Controlled directly by Admin) */}
-        <div className="bg-white p-5 rounded-2xl shadow-sm border-2 border-green-500/20 flex flex-col justify-between hover:shadow-md transition relative overflow-hidden">
+        <div className="bg-white p-5 rounded-2xl shadow-sm border-2 border-green-500/20 flex flex-col justify-between hover:shadow-md transition relative overflow-hidden min-w-0">
           <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/5 rounded-full -translate-y-6 translate-x-6 pointer-events-none"></div>
-          <div>
-            <p className="text-2xl sm:text-3xl font-black text-green-600 tracking-tight font-mono">{user.recovered || '$0.00'}</p>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Recovered</p>
+          <div className="min-w-0 relative z-10">
+            {(() => {
+              const formatted = formatCurrency(user.recovered || '$0.00');
+              return (
+                <p 
+                  title={formatted} 
+                  className={`${getAmountFontSize(formatted)} text-green-600 tracking-tight font-mono truncate w-full`}
+                >
+                  {formatted}
+                </p>
+              );
+            })()}
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1 truncate">Recovered</p>
           </div>
-          <div className="h-1.5 w-12 bg-green-500 rounded-full mt-4"></div>
+          <div className="h-1.5 w-12 bg-green-500 rounded-full mt-4 flex-shrink-0 relative z-10"></div>
         </div>
 
         {/* 2FA Status */}
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between hover:shadow-md transition">
-          <div>
-            <div className="flex items-center gap-2">
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between hover:shadow-md transition overflow-hidden min-w-0">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
               {user.twoFactor ? (
                 <>
-                  <ShieldCheck className="w-5 h-5 text-emerald-600 fill-emerald-600/20" />
-                  <p className="text-xl sm:text-2xl font-black text-emerald-600 tracking-tight">ON</p>
+                  <ShieldCheck className="w-5 h-5 text-emerald-600 fill-emerald-600/20 flex-shrink-0" />
+                  <p className="text-xl sm:text-2xl font-black text-emerald-600 tracking-tight truncate">ON</p>
                 </>
               ) : (
                 <>
-                  <AlertTriangle className="w-5 h-5 text-amber-500 fill-amber-500/20" />
-                  <p className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">OFF</p>
+                  <AlertTriangle className="w-5 h-5 text-amber-500 fill-amber-500/20 flex-shrink-0" />
+                  <p className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight truncate">OFF</p>
                 </>
               )}
             </div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">2FA Status</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1 truncate">2FA Status</p>
           </div>
-          <div className={`h-1.5 w-12 ${user.twoFactor ? 'bg-emerald-500' : 'bg-amber-500'} rounded-full mt-4`}></div>
+          <div className={`h-1.5 w-12 ${user.twoFactor ? 'bg-emerald-500' : 'bg-amber-500'} rounded-full mt-4 flex-shrink-0`}></div>
         </div>
 
         {/* ID Verification Status Card */}
-        <Link href="/dashboard/verify" className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between col-span-2 sm:col-span-1 hover:shadow-md hover:border-blue-300 transition group">
-          <div>
+        <Link href="/dashboard/verify" className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between col-span-2 sm:col-span-1 hover:shadow-md hover:border-blue-300 transition group overflow-hidden min-w-0">
+          <div className="min-w-0">
             {user.isVerified || user.verificationStatus === 'VERIFIED' ? (
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-emerald-600 fill-emerald-600/20" />
-                <p className="text-xl sm:text-2xl font-bold text-emerald-600 tracking-tight">Verified</p>
+              <div className="flex items-center gap-2 min-w-0">
+                <ShieldCheck className="w-5 h-5 text-emerald-600 fill-emerald-600/20 flex-shrink-0" />
+                <p className="text-xl sm:text-2xl font-bold text-emerald-600 tracking-tight truncate">Verified</p>
               </div>
             ) : user.verificationStatus === 'SUBMITTED' ? (
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-amber-500 fill-amber-500/20" />
-                <p className="text-lg sm:text-xl font-black text-amber-600 tracking-tight">In Review</p>
+              <div className="flex items-center gap-2 min-w-0">
+                <AlertTriangle className="w-5 h-5 text-amber-500 fill-amber-500/20 flex-shrink-0" />
+                <p className="text-lg sm:text-xl font-black text-amber-600 tracking-tight truncate">In Review</p>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <ShieldAlert className="w-5 h-5 text-blue-600 fill-blue-600/20 group-hover:scale-110 transition transform" />
-                <p className="text-xl sm:text-2xl font-bold text-blue-600 tracking-tight">Unverified</p>
+              <div className="flex items-center gap-2 min-w-0">
+                <ShieldAlert className="w-5 h-5 text-blue-600 fill-blue-600/20 group-hover:scale-110 transition transform flex-shrink-0" />
+                <p className="text-xl sm:text-2xl font-bold text-blue-600 tracking-tight truncate">Unverified</p>
               </div>
             )}
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1 flex items-center justify-between">
-              <span>ID Verification</span>
-              <span className="text-[10px] text-blue-600 group-hover:underline">Manage &rarr;</span>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1 flex items-center justify-between min-w-0">
+              <span className="truncate mr-1">ID Verification</span>
+              <span className="text-[10px] text-blue-600 group-hover:underline flex-shrink-0">Manage &rarr;</span>
             </p>
           </div>
-          <div className={`h-1.5 w-12 ${user.isVerified ? 'bg-emerald-500' : user.verificationStatus === 'SUBMITTED' ? 'bg-amber-500' : 'bg-blue-400'} rounded-full mt-4`}></div>
+          <div className={`h-1.5 w-12 ${user.isVerified ? 'bg-emerald-500' : user.verificationStatus === 'SUBMITTED' ? 'bg-amber-500' : 'bg-blue-400'} rounded-full mt-4 flex-shrink-0`}></div>
         </Link>
       </div>
 
@@ -337,10 +381,10 @@ export default function DashboardHomePage() {
                     <div className="flex flex-col lg:items-end justify-between space-y-4 text-left lg:text-right">
                       <div>
                         <p className="text-sm font-bold text-slate-500">
-                          Disputed Amount: <span className="text-amber-700 font-extrabold font-mono">{c.disputedAmount || user.balance || '$0.00'}</span>
+                          Disputed Amount: <span className="text-amber-700 font-extrabold font-mono">{formatCurrency(c.disputedAmount || user.balance || '$0.00')}</span>
                         </p>
                         <p className="text-sm font-bold text-slate-500 mt-1">
-                          Recovered Amount: <span className="text-green-600 font-extrabold font-mono">{c.recoveredAmount || user.recovered || '$0.00'}</span>
+                          Recovered Amount: <span className="text-green-600 font-extrabold font-mono">{formatCurrency(c.recoveredAmount || user.recovered || '$0.00')}</span>
                         </p>
                       </div>
 
@@ -644,11 +688,18 @@ export default function DashboardHomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-5 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl shadow-lg flex flex-col justify-between space-y-4">
-            <div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 block">Current Available Balance</span>
-              <p className="text-3xl font-mono font-extrabold text-white mt-1">{user.balance || '$0.00'}</p>
-              <p className="text-xs text-slate-300 font-medium mt-1">Ready for verified bank wire or cold-wallet routing.</p>
+          <div className="p-5 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl shadow-lg flex flex-col justify-between space-y-4 overflow-hidden min-w-0">
+            <div className="min-w-0">
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 block truncate">Current Available Balance</span>
+              {(() => {
+                const formatted = formatCurrency(user.balance || '$0.00');
+                return (
+                  <p title={formatted} className={`${getAmountFontSize(formatted)} font-mono font-extrabold text-white mt-1 truncate w-full`}>
+                    {formatted}
+                  </p>
+                );
+              })()}
+              <p className="text-xs text-slate-300 font-medium mt-1 truncate">Ready for verified bank wire or cold-wallet routing.</p>
             </div>
             <div className="pt-2">
               <button 
@@ -667,11 +718,18 @@ export default function DashboardHomePage() {
             </div>
           </div>
 
-          <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col justify-between space-y-4">
-            <div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 block">Total Restitution Recovered</span>
-              <p className="text-3xl font-mono font-extrabold text-slate-900 mt-1">{user.recovered || '$0.00'}</p>
-              <p className="text-xs text-slate-500 font-medium mt-1">Aggregate forensic recoveries achieved by GDFAS legal action.</p>
+          <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col justify-between space-y-4 overflow-hidden min-w-0">
+            <div className="min-w-0">
+              <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 block truncate">Total Restitution Recovered</span>
+              {(() => {
+                const formatted = formatCurrency(user.recovered || '$0.00');
+                return (
+                  <p title={formatted} className={`${getAmountFontSize(formatted)} font-mono font-extrabold text-slate-900 mt-1 truncate w-full`}>
+                    {formatted}
+                  </p>
+                );
+              })()}
+              <p className="text-xs text-slate-500 font-medium mt-1 truncate">Aggregate forensic recoveries achieved by GDFAS legal action.</p>
             </div>
             <div className="pt-2">
               <Link 
