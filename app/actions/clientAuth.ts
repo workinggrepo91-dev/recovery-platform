@@ -172,7 +172,7 @@ export async function registerOrLoginClient(data: {
     twoFactor: user.twoFactor || false,
     balance: user.balance || '$0.00',
     recovered: user.recovered || '$0.00',
-    cases: user.cases || []
+    cases: [] // DANGEROUS: Do not put full database cases into the cookie (causes 4KB crash). Let getCurrentClient fetch them!
   };
 
   const cookieStore = await cookies();
